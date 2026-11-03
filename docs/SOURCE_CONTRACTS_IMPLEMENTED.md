@@ -1,4 +1,4 @@
-# Source contracts, version 1.0
+# Construction example source contracts, version 1.0
 
 The implementation consumes six separate CSV exports from `landing/`, all labeled synthetic. Every row carries the common envelope in `docs/SOURCE_CONTRACTS.md`. Source columns currently used are:
 

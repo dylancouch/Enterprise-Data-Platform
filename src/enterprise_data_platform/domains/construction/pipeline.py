@@ -1,4 +1,4 @@
-"""Spark and Delta implementation of the local Milestone 1 pipeline."""
+"""Spark and Delta implementation of the construction reference example."""
 
 from __future__ import annotations
 
@@ -13,6 +13,21 @@ from pyspark.sql import SparkSession, Window
 from pyspark.sql import functions as F
 from pyspark.sql import types as T
 
+from enterprise_data_platform import PROJECT_DESCRIPTION, PROJECT_NAME
+from enterprise_data_platform.core import (
+    create_spark,
+    freshness_status,
+    latest_revision,
+    merge_raw,
+    publish_generation,
+)
+from enterprise_data_platform.core import (
+    read_delta as _read_delta,
+)
+from enterprise_data_platform.core import (
+    write_delta as _write_delta,
+)
+
 FEEDS = ("purchase_order_lines", "scale_tickets", "site_receipts", "invoices", "invoice_lines", "invoice_delivery_allocations")
 CONVERSION_TO_KG = {"kg": "1", "metric_tonne": "1000", "us_short_ton": "907.18474"}
 KEYS = {
@@ -23,26 +38,6 @@ KEYS = {
     "invoice_lines": ["company_id", "supplier_id", "invoice_id", "invoice_line_id"],
     "invoice_delivery_allocations": ["company_id", "supplier_id", "invoice_id", "invoice_line_id", "allocation_id"],
 }
-
-
-def create_spark(app_name: str = "construction-data-platform") -> SparkSession:
-    project_root = Path(__file__).resolve().parents[2]
-    builder = SparkSession.builder.appName(app_name)
-    if "DATABRICKS_RUNTIME_VERSION" in __import__("os").environ:
-        # Databricks Runtime supplies Spark and Delta; do not override managed compute settings.
-        spark = builder.getOrCreate()
-    else:
-        from delta import configure_spark_with_delta_pip
-
-        builder = (builder.master("local[2]")
-            .config("spark.ui.enabled", "false")
-            .config("spark.sql.shuffle.partitions", "2")
-            .config("spark.jars.ivy", str(project_root / ".cache" / "ivy"))
-            .config("spark.local.dir", str(project_root / ".cache" / "spark-tmp"))
-            .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
-            .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog"))
-        spark = configure_spark_with_delta_pip(builder).getOrCreate()
-    return spark
 
 
 def _input_files(landing: Path) -> list[Path]:
@@ -80,15 +75,6 @@ def _union(frames):
     return result
 
 
-def _write_delta(df, path: Path, mode: str = "overwrite"):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    df.write.format("delta").mode(mode).option("overwriteSchema", "true").save(str(path))
-
-
-def _read_delta(spark, path: Path):
-    return spark.read.format("delta").load(str(path))
-
-
 def run_pipeline(root: Path, spark: SparkSession | None = None, fail_after_product: str | None = None) -> dict[str, object]:
     root = root.resolve()
     landing, store = root / "landing", root / "tables"
@@ -106,17 +92,12 @@ def run_pipeline(root: Path, spark: SparkSession | None = None, fail_after_produ
     for name in FEEDS:
         raw = _union(ingest[name])
         raw_path = store / "bronze" / name
-        if raw_path.exists():
-            previous = _read_delta(spark, raw_path)
-            raw = previous if raw is None else previous.unionByName(raw, allowMissingColumns=True)
+        raw, retry_duplicates = merge_raw(spark, raw, raw_path, ["source_file", "file_content_hash", "payload_hash"])
         if raw is None:
             continue
-        before_retry_dedup = raw.count()
-        raw = raw.dropDuplicates(["source_file", "file_content_hash", "payload_hash"])
         deduplicated_count = raw.count()
-        duplicates += before_retry_dedup - deduplicated_count
+        duplicates += retry_duplicates
         raw_frames[name] = raw
-        _write_delta(raw, raw_path)
         counts[name] = deduplicated_count
 
     def current(name: str):
@@ -125,7 +106,6 @@ def run_pipeline(root: Path, spark: SparkSession | None = None, fail_after_produ
         if df is None:
             return None
         keys = KEYS[name]
-        w = Window.partitionBy(*keys).orderBy(F.col("source_revision").cast("long").desc(), F.col("source_updated_at").desc(), F.col("payload_hash").asc())
         technical = df.dropDuplicates([*keys, "source_revision", "payload_hash"])
         duplicates += df.count() - technical.count()
         unsupported_schema = technical.filter(F.col("schema_version") != "1.0")
@@ -139,7 +119,7 @@ def run_pipeline(root: Path, spark: SparkSession | None = None, fail_after_produ
             raise ValueError(f"Conflicting equal revision in {name}; no deterministic winner is publishable")
         history_path = store / "silver" / f"{name}_history"
         _write_delta(technical, history_path)
-        latest = technical.withColumn("_rank", F.row_number().over(w)).filter("_rank = 1").drop("_rank")
+        latest = latest_revision(technical, keys, "source_revision", "source_updated_at", "payload_hash")
         _write_delta(latest, store / "silver" / f"{name}_current")
         return latest
 
@@ -313,21 +293,14 @@ def run_pipeline(root: Path, spark: SparkSession | None = None, fail_after_produ
         if latest_update is not None and latest_update.tzinfo is None:
             latest_update = latest_update.replace(tzinfo=UTC)
         latest_update_text = latest_update.isoformat() if latest_update is not None else None
-        if file_count == 0:
-            freshness_status = "MISSING_EXPECTED_FILE"
-        elif latest_update is None:
-            freshness_status = "MISSING_OR_INVALID_SOURCE_UPDATED_AT"
-        elif (datetime.fromisoformat(started) - latest_update).total_seconds() > 72 * 3600:
-            freshness_status = "STALE_SOURCE_UPDATE_OVER_72H"
-        else:
-            freshness_status = "RECEIVED"
+        status = freshness_status(file_count, latest_update, datetime.fromisoformat(started))
         freshness_rows.append((
             feed,
             file_count,
             row_count,
             latest_update_text,
             started if file_count else None,
-            freshness_status,
+            status,
             started,
             True,
         ))
@@ -591,12 +564,8 @@ def run_pipeline(root: Path, spark: SparkSession | None = None, fail_after_produ
         _write_delta(exception_rows, staged / "invoice_exceptions")
         product_counts["invoice_exceptions"] = 0
     # The pointer is the sole consumer contract; no table under gold/latest is read directly.
-    pointer = {"generation": generation, "run_id": run_id, "published_at_utc": datetime.now(UTC).isoformat(), "synthetic": True}
     pointer_path = store / "gold" / "current_generation.json"
-    pointer_path.parent.mkdir(parents=True, exist_ok=True)
-    temp = pointer_path.with_suffix(".tmp")
-    temp.write_text(json.dumps(pointer, indent=2) + "\n", encoding="utf-8")
-    temp.replace(pointer_path)
+    publish_generation(pointer_path, generation, run_id)
     def product_rows(name: str) -> list[dict[str, object]]:
         product_path = staged / name
         if not product_path.exists():
@@ -604,6 +573,9 @@ def run_pipeline(root: Path, spark: SparkSession | None = None, fail_after_produ
         return [row.asDict(recursive=True) for row in _read_delta(spark, product_path).collect()]
 
     report = {
+        "project": PROJECT_NAME,
+        "description": PROJECT_DESCRIPTION,
+        "domain": "construction",
         "run_id": run_id,
         "generation": generation,
         "status": "SUCCESS",
@@ -653,7 +625,7 @@ def published_product(root: Path, product: str) -> list[dict[str, object]]:
     root = root.resolve()
     pointer = json.loads((root / "tables" / "gold" / "current_generation.json").read_text())
     path = root / "tables" / "gold" / "generations" / pointer["generation"] / product
-    spark = create_spark("construction-data-platform-read")
+    spark = create_spark("enterprise-data-platform-construction-read")
     try:
         return [r.asDict(recursive=True) for r in _read_delta(spark, path).collect()]
     finally:

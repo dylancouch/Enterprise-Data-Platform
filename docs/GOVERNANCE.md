@@ -1,4 +1,4 @@
-# Governance and access verification
+# Construction example governance and access verification
 
 The following is an intended access matrix for a future Unity Catalog deployment. No workspace principals or grants are configured or tested in this repository, so this is a design proposal and not evidence of enforced access controls.
 

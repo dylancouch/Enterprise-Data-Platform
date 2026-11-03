@@ -8,16 +8,16 @@ The latest local synthetic demo run is recorded in [`evidence/milestone1-local-d
 
 ## Checks actually run
 
-- `make test` — **18 passed in 976.03 seconds** using local PySpark 4.0.1 and Delta Lake 4.0.0.
+- Before the Enterprise Data Platform refactor, `make test` — **18 passed in 976.03 seconds** using local PySpark 4.0.1 and Delta Lake 4.0.0. Current-package verification is recorded below.
 - `make demo` — completed successfully again after Milestone 3 changes using real local Spark and Delta. The newest synthetic generation reports 10.000000 tonnes, USD 125.00 net invoice amount, zero invoice exceptions, and six source freshness rows; the PO update is flagged stale under the 72-hour demo threshold.
 - `.venv/bin/ruff check src tests scripts` — passed.
 - `.venv/bin/python -m compileall -q src tests scripts` — passed.
 - Parsed `databricks.yml` as YAML and asserted bounded concurrency, timeout, retry, serverless environment, scenario parameter wiring, dev scenario default, and entrypoint path — passed.
-- `.venv/bin/python -m construction_data_platform.databricks_entry --help` — passed; confirmed the workspace entrypoint exposes the configured scenario choices.
-- `.tools/databricks/databricks bundle validate -t dev` — configuration was read, then validation stopped because profile `construction-data-dev` has no configured authentication. No remote validation, deployment, or job run occurred. The installed CLI can emit the official bundle schema, but full validation is workspace-aware and requires authentication.
+- `.venv/bin/python -m enterprise_data_platform.databricks_entry --help` — passed; confirmed the workspace entrypoint exposes the configured scenario choices.
+- Before the rename, `.tools/databricks/databricks bundle validate -t dev` read the configuration, then stopped because the old `construction-data-dev` profile had no authentication. No remote validation, deployment, or job run occurred. The installed CLI can emit the official bundle schema, but full validation is workspace-aware and requires authentication.
 - `make recovery-demo` — passed; interrupted correction retained the prior pointer, restart published 9 tonnes and one invoice exception. Sanitized output: `evidence/milestone3-local-recovery.json`.
 - `BENCHMARK_ARGS='--allocations-per-delivery 16' make benchmark` — passed output conservation checks and emitted `evidence/milestone4-allocation-benchmark.json` with row counts, bytes, configuration, and timings.
-- `.venv/bin/python -m construction_data_platform.cli report --root data/demo` plus `scripts/render-report.py` — passed; generated the actual synthetic snapshot at `reports/synthetic-dashboard.html` and saved its run report at `evidence/milestone4-dashboard-run.json`.
+- `.venv/bin/python -m enterprise_data_platform.cli report --root data/demo` plus `scripts/render-report.py` — passed; generated the actual synthetic snapshot at `reports/synthetic-dashboard.html` and saved its run report at `evidence/milestone4-dashboard-run.json`.
 - `git diff --check` — passed.
 
 The 18 Spark acceptance tests cover clean oracle reconciliation; same-name and renamed-file replay; interrupted publication and restart; corrections and out-of-order revisions; invalid-row quarantine and higher-revision repair; additive fields and unsupported schema versions; late PO/receipt arrival; missing/stale source status; ticket cancellation; linked and unlinked credits; amount/price discrepancies; unit normalization; PO effective pricing; allocation conservation; tolerance boundaries; and invalid timestamps/units.
@@ -46,7 +46,7 @@ Local task settings can be varied without editing the bundle, for example `--var
 When a workspace is available, authenticate locally without sharing credentials in chat, then validate:
 
 ```bash
-.tools/databricks/databricks auth login --host https://<workspace-url> --profile construction-data-dev
+.tools/databricks/databricks auth login --host https://<workspace-url> --profile enterprise-data-dev
 .tools/databricks/databricks bundle validate -t dev
 ```
 
@@ -75,3 +75,13 @@ Milestone 1 local acceptance is complete. Milestone 3 local failure scenarios an
 The HTML report now resolves the current run through the publication pointer and leads with run status, whether publication succeeded, the consumer pointer and generation, counts of arrived/missing/stale feeds, and changes in accepted quantity, exception count, and quarantine count from the previous successful generation. Detailed feed rows remain available below the summary. The comparison is a concise current-versus-prior view; it does not yet classify individual records as added, changed, or removed.
 
 `make saas-demo` now runs a full local Spark/Delta walkthrough: initial 10-unit billing mismatch with stale usage, renamed-file replay with business-event deduplication, a corrected usage revision, an injected interruption before pointer swap, and successful recovery. The walkthrough asserts that the pointer stays on the last good generation during failure and that the correction reconciles 190 observed and billed units. The verified run is recorded at `data/saas-demo/walkthrough-20261028T192343693456Z/evidence/walkthrough.json`. Every invocation uses a new timestamped folder beneath `data/saas-demo/`; its step summaries and generation IDs are saved in `evidence/walkthrough.json`. This remains an independent synthetic transfer example, not a generalized configurable framework. Workspace verification remains the existing Milestone 2 blocker.
+
+## 2026-11-03 — Enterprise Data Platform migration
+
+The project-facing name and description are now **Enterprise Data Platform**: "A Spark and Delta data platform for integrating operational sources, publishing trustworthy analytics, and monitoring pipeline health across industries." The Python distribution is `enterprise-data-platform` 0.2.0, package is `enterprise_data_platform`, CLI is `edp`, and the Databricks bundle and isolated resource names use the new slug. The GitHub repository and description were renamed to `dylancouch/enterprise-data-platform`; local `origin` points there. This active workspace directory still has its original local folder name.
+
+Shared Spark/Delta mechanics live in `src/enterprise_data_platform/core.py`. The construction and SaaS examples call the same raw replay merge, revision selection, freshness assessment, and local generation publisher. Their separate contracts are in `docs/SOURCE_CONTRACTS.md` and `docs/SAAS_CONTRACT.md`; `docs/EXTENDING.md` records how to add a domain. The second example is sufficient to demonstrate transfer, so no third fixture was added. The Databricks bundle still runs only the construction example and has not been workspace validated.
+
+Local checks completed: `.venv/bin/pip install -e '.[dev]'`; `edp --help`; renamed entrypoint `--help`; YAML parse plus bounded job/path assertions; Ruff and Python compilation; construction fixture generation with a separate oracle; `make demo`; and `make saas-demo`. The construction run published 10.000000 metric tonnes, zero invoice exceptions, and six source freshness rows; its sanitized report is `evidence/enterprise-construction-demo.json`, and its HTML snapshot is `reports/synthetic-dashboard.html`. The SaaS run showed 200 observed versus 190 billed units, replay suppression, a failed staged correction retaining the last-good pointer, and recovery at 190 versus 190. Sanitized evidence is `evidence/enterprise-saas-walkthrough.json`.
+
+`make test` passed all **18 construction acceptance tests in 1051.98 seconds** after the package refactor. `make test TEST_ARGS=tests/test_saas.py` passed **1 focused SaaS conflict test in 11.97 seconds**, confirming that an equal-revision payload conflict refuses publication and retains the prior pointer. GitHub Actions now includes both domains, but its updated workflow has not been remotely verified. No Databricks authentication or workspace run was performed. The next platform milestone remains authenticated Databricks verification; SaaS malformed-input handling and multiple-invoice semantics remain future domain work.

@@ -1,0 +1,120 @@
+{
+  "synthetic": true,
+  "project": "Enterprise Data Platform",
+  "description": "A Spark and Delta data platform for integrating operational sources, publishing trustworthy analytics, and monitoring pipeline health across industries.",
+  "domain": "saas-usage-billing",
+  "scenario": "saas-usage-to-invoice-replay-correction-recovery",
+  "root": "data/saas-demo/walkthrough-20261103T193453214569Z",
+  "steps": {
+    "initial_mismatch": {
+      "status": "SUCCESS",
+      "published": true,
+      "generation": "20261103T193501804560Z-91517103",
+      "staged_generation": "20261103T193501804560Z-91517103",
+      "last_good_generation": null,
+      "duplicates_suppressed": 0,
+      "observed_units": 200,
+      "billed_units": 190,
+      "exception": "BILLED_USAGE_MISMATCH",
+      "source_freshness": [
+        {
+          "feed": "usage",
+          "status": "STALE_SOURCE_UPDATE_OVER_72H",
+          "files": 1,
+          "rows": 2,
+          "latest_update": "2026-10-29T19:34:53.214590+00:00"
+        },
+        {
+          "feed": "invoices",
+          "status": "RECEIVED",
+          "files": 1,
+          "rows": 1,
+          "latest_update": "2026-11-03T19:34:53.214596+00:00"
+        }
+      ]
+    },
+    "renamed_file_replay": {
+      "status": "SUCCESS",
+      "published": true,
+      "generation": "20261103T193508900747Z-5c0641d7",
+      "staged_generation": "20261103T193508900747Z-5c0641d7",
+      "last_good_generation": "20261103T193501804560Z-91517103",
+      "duplicates_suppressed": 5,
+      "observed_units": 200,
+      "billed_units": 190,
+      "exception": "BILLED_USAGE_MISMATCH",
+      "source_freshness": [
+        {
+          "feed": "usage",
+          "status": "STALE_SOURCE_UPDATE_OVER_72H",
+          "files": 2,
+          "rows": 2,
+          "latest_update": "2026-10-29T19:34:53.214590+00:00"
+        },
+        {
+          "feed": "invoices",
+          "status": "RECEIVED",
+          "files": 1,
+          "rows": 1,
+          "latest_update": "2026-11-03T19:34:53.214596+00:00"
+        }
+      ]
+    },
+    "interrupted_correction": {
+      "status": "FAILED_INJECTED",
+      "published": false,
+      "generation": null,
+      "staged_generation": "20261103T193515200026Z-e1d4e8e6",
+      "last_good_generation": "20261103T193508900747Z-5c0641d7",
+      "duplicates_suppressed": 5,
+      "observed_units": 190,
+      "billed_units": 190,
+      "exception": null,
+      "source_freshness": [
+        {
+          "feed": "usage",
+          "status": "RECEIVED",
+          "files": 3,
+          "rows": 2,
+          "latest_update": "2026-11-03T19:35:10.028761+00:00"
+        },
+        {
+          "feed": "invoices",
+          "status": "RECEIVED",
+          "files": 1,
+          "rows": 1,
+          "latest_update": "2026-11-03T19:34:53.214596+00:00"
+        }
+      ]
+    },
+    "recovered_correction": {
+      "status": "SUCCESS",
+      "published": true,
+      "generation": "20261103T193520958862Z-68bd4c91",
+      "staged_generation": "20261103T193520958862Z-68bd4c91",
+      "last_good_generation": "20261103T193508900747Z-5c0641d7",
+      "duplicates_suppressed": 6,
+      "observed_units": 190,
+      "billed_units": 190,
+      "exception": null,
+      "source_freshness": [
+        {
+          "feed": "usage",
+          "status": "RECEIVED",
+          "files": 3,
+          "rows": 2,
+          "latest_update": "2026-11-03T19:35:10.028761+00:00"
+        },
+        {
+          "feed": "invoices",
+          "status": "RECEIVED",
+          "files": 1,
+          "rows": 1,
+          "latest_update": "2026-11-03T19:34:53.214596+00:00"
+        }
+      ]
+    }
+  },
+  "pointer_retained_during_failure": true,
+  "pointer_after_recovery": "20261103T193520958862Z-68bd4c91"
+}

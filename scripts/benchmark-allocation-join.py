@@ -12,7 +12,7 @@ from pathlib import Path
 
 from pyspark.sql import functions as F
 
-from construction_data_platform.pipeline import create_spark
+from enterprise_data_platform.core import create_spark
 
 
 def main() -> None:
@@ -26,7 +26,7 @@ def main() -> None:
     lines = args.lines
     allocations_per_delivery = args.allocations_per_delivery
     repetitions = args.repetitions
-    with tempfile.TemporaryDirectory(prefix="cdp-allocation-bench-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="edp-allocation-bench-") as temporary:
         root = Path(temporary)
         allocation_path = root / "allocations.csv"
         with allocation_path.open("w", newline="", encoding="utf-8") as stream:
@@ -37,7 +37,7 @@ def main() -> None:
                 delivery_id = f"D{line_number:06d}"
                 for _ in range(allocations_per_delivery):
                     writer.writerow([line_id, delivery_id, f"{1 / allocations_per_delivery:.6f}"])
-        spark = create_spark("construction-data-platform-allocation-benchmark")
+        spark = create_spark("enterprise-data-platform-allocation-benchmark")
         try:
             allocations = spark.read.option("header", True).csv(str(allocation_path)).withColumn(
                 "allocated_quantity", F.col("allocated_quantity").cast("decimal(18,6)")

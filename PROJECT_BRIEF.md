@@ -1,8 +1,12 @@
-# construction-data-platform
+# Enterprise Data Platform
 
-A Databricks data platform that connects construction purchasing, deliveries, and invoices to produce reliable reporting and identify discrepancies.
+A Spark and Delta data platform for integrating operational sources, publishing trustworthy analytics, and monitoring pipeline health across industries.
 
-## Purpose and business setting
+## Platform scope
+
+Provide reusable local Spark/Delta mechanics for source replay handling, revision selection, source freshness, and complete reporting publication. Prove the mechanics with distinct synthetic domains. The construction purchasing/delivery/invoice pipeline is the detailed reference example; SaaS usage-to-invoice reconciliation is the transfer example. Databricks remains the intended remote execution target, with workspace execution pending. Domain rules stay explicit and separately documented.
+
+## Construction example: purpose and business setting
 Build a realistic, bounded data engineering assignment for a fictional infrastructure contractor. Purchasing, dispatch, scale houses, field receiving, and accounts payable send independent records on different schedules. Operations needs delivered quantities; accounts payable needs explainable invoice exceptions. Late records, duplicate exports, corrected tickets, and inconsistent identifiers undermine trust.
 
 This is inspired by infrastructure-contractor enterprise data engineering responsibilities. It does not represent Michels systems, proprietary data, or a deployed enterprise service. Synthetic operational sources enable exact correctness tests. Demonstrating platform engineering matters more than adding an AI feature.
@@ -38,6 +42,8 @@ Business-key/revision deduplication must survive checkpoint changes and bounded 
 Start with a tiny deterministic fixture and a modest demonstration profile, for example 10 projects and tens of thousands of operational records. Add configurable larger profiles within available quotas. Capture actual row counts, input bytes, output bytes, compute configuration, and elapsed times. Do not equate synthetic millions of rows with proven enterprise scale.
 
 ## Milestone 1 — complete local baseline
+The original four milestones below specify the detailed construction reference implementation. The SaaS example and shared-core extraction were added later as transfer demonstrations; their current state is in `docs/STATUS.md`.
+
 Implement the core four domains: purchasing, scale tickets, site receipts, invoices/allocations. Keep dispatch optional.
 - Package and CLI with generate, ingest, transform, reconcile, validate, and demo/replay operations, or an equally clear small interface.
 - Versioned source contracts, deterministic generator, independent expected-result fixture, and source provenance.

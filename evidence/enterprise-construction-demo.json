@@ -1,0 +1,123 @@
+{
+  "project": "Enterprise Data Platform",
+  "description": "A Spark and Delta data platform for integrating operational sources, publishing trustworthy analytics, and monitoring pipeline health across industries.",
+  "domain": "construction",
+  "run_id": "0e682f51-358f-412b-93bc-20f53e5afaae",
+  "generation": "20261103T193735979015Z-0e682f51",
+  "status": "SUCCESS",
+  "published": true,
+  "synthetic": true,
+  "started_at_utc": "2026-11-03T19:36:42.477928+00:00",
+  "finished_at_utc": "2026-11-03T19:37:44.668764+00:00",
+  "source_rows_by_feed": {
+    "purchase_order_lines": 1,
+    "scale_tickets": 1,
+    "site_receipts": 1,
+    "invoices": 1,
+    "invoice_lines": 1,
+    "invoice_delivery_allocations": 1
+  },
+  "duplicate_business_envelopes_suppressed": 6,
+  "quarantine_rows": 0,
+  "product_rows": {
+    "daily_delivered_quantities": 1,
+    "source_freshness": 6,
+    "invoice_exceptions": 0,
+    "invoice_net_amounts": 1
+  },
+  "daily_delivered": [
+    {
+      "project_id": "P-001",
+      "material_id": "AGG-1",
+      "business_date": "2026-10-20",
+      "accepted_net_quantity": "10.000000"
+    }
+  ],
+  "invoice_exceptions": [],
+  "invoice_net_amounts": [
+    {
+      "company_id": "NORTHSTAR-CIVIL",
+      "supplier_id": "SUP-1",
+      "currency": "USD",
+      "net_invoice_amount": "125.00"
+    }
+  ],
+  "source_freshness": [
+    {
+      "source_feed": "invoices",
+      "files_received_this_run": 1,
+      "rows_received_this_run": 1,
+      "latest_source_updated_at_utc": "2026-10-20T13:00:00+00:00",
+      "last_ingestion_at_utc": "2026-11-03T19:36:42.477928+00:00",
+      "freshness_status": "STALE_SOURCE_UPDATE_OVER_72H",
+      "assessment_time_utc": "2026-11-03T19:36:42.477928+00:00",
+      "synthetic": true
+    },
+    {
+      "source_feed": "invoice_lines",
+      "files_received_this_run": 1,
+      "rows_received_this_run": 1,
+      "latest_source_updated_at_utc": "2026-10-20T13:00:00+00:00",
+      "last_ingestion_at_utc": "2026-11-03T19:36:42.477928+00:00",
+      "freshness_status": "STALE_SOURCE_UPDATE_OVER_72H",
+      "assessment_time_utc": "2026-11-03T19:36:42.477928+00:00",
+      "synthetic": true
+    },
+    {
+      "source_feed": "invoice_delivery_allocations",
+      "files_received_this_run": 1,
+      "rows_received_this_run": 1,
+      "latest_source_updated_at_utc": "2026-10-20T13:00:00+00:00",
+      "last_ingestion_at_utc": "2026-11-03T19:36:42.477928+00:00",
+      "freshness_status": "STALE_SOURCE_UPDATE_OVER_72H",
+      "assessment_time_utc": "2026-11-03T19:36:42.477928+00:00",
+      "synthetic": true
+    },
+    {
+      "source_feed": "purchase_order_lines",
+      "files_received_this_run": 1,
+      "rows_received_this_run": 1,
+      "latest_source_updated_at_utc": "2026-10-19T07:00:00+00:00",
+      "last_ingestion_at_utc": "2026-11-03T19:36:42.477928+00:00",
+      "freshness_status": "STALE_SOURCE_UPDATE_OVER_72H",
+      "assessment_time_utc": "2026-11-03T19:36:42.477928+00:00",
+      "synthetic": true
+    },
+    {
+      "source_feed": "scale_tickets",
+      "files_received_this_run": 1,
+      "rows_received_this_run": 1,
+      "latest_source_updated_at_utc": "2026-10-20T09:30:00+00:00",
+      "last_ingestion_at_utc": "2026-11-03T19:36:42.477928+00:00",
+      "freshness_status": "STALE_SOURCE_UPDATE_OVER_72H",
+      "assessment_time_utc": "2026-11-03T19:36:42.477928+00:00",
+      "synthetic": true
+    },
+    {
+      "source_feed": "site_receipts",
+      "files_received_this_run": 1,
+      "rows_received_this_run": 1,
+      "latest_source_updated_at_utc": "2026-10-20T09:30:00+00:00",
+      "last_ingestion_at_utc": "2026-11-03T19:36:42.477928+00:00",
+      "freshness_status": "STALE_SOURCE_UPDATE_OVER_72H",
+      "assessment_time_utc": "2026-11-03T19:36:42.477928+00:00",
+      "synthetic": true
+    }
+  ],
+  "publication_pointer": "tables/gold/current_generation.json",
+  "changes_from_previous_generation": {
+    "previous_generation": "20261028T191945925929Z-84f7e8b2",
+    "accepted_net_quantity": {
+      "previous": "10.000000",
+      "current": "10.000000"
+    },
+    "invoice_exception_count": {
+      "previous": 0,
+      "current": 0
+    },
+    "quarantine_rows": {
+      "previous": 0,
+      "current": 0
+    }
+  }
+}

@@ -1,4 +1,4 @@
-# Data dictionary
+# Construction example data dictionary
 
 All values are synthetic. Source records retain a common envelope (`source_system`, `company_id`, `schema_version`, `source_record_id`, `source_revision`, `source_updated_at`, `event_time`) plus `source_file`, `file_content_hash`, `payload_hash`, `ingested_at`, and `ingestion_batch_id`.
 

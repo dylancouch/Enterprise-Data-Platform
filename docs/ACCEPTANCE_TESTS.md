@@ -1,6 +1,6 @@
-# Acceptance scenarios
+# Construction example acceptance scenarios
 
-Codex must implement executable assertions and save sanitized run evidence, not merely copy this checklist into a README. Run tiny golden tests locally and repeat core integration cases in Databricks when access permits. Keep source scenario truth out of the ingestion inputs.
+Executable assertions live in `tests/test_pipeline.py`, with sanitized local run evidence under `evidence/`. This checklist includes implemented and future scenarios; `docs/STATUS.md` records which have actually run. Repeat core integration cases in Databricks when access permits. Keep source scenario truth out of ingestion inputs.
 
 | Scenario | Expected behavior |
 | --- | --- |

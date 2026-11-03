@@ -1,13 +1,13 @@
-# Recovery runbook
+# Construction example recovery runbook
 
-All examples use synthetic local fixtures. Local commands validate the packaged Spark/Delta implementation; they do not exercise Databricks or an upstream source connection.
+This example uses synthetic local fixtures. Local commands validate the packaged Spark/Delta implementation; they do not exercise Databricks or an upstream source connection. The SaaS example's interruption and recovery sequence is documented in `docs/SAAS_CONTRACT.md`.
 
 ## Upstream outage or stale source
 
 1. Check the latest run report in `<root>/evidence/runs/` and compare source files against the expected arrival schedule. A missing file is a freshness gap, not a zero-row success.
 2. Keep consumers on the generation named by `<root>/tables/gold/current_generation.json`. A failed run leaves that pointer unchanged.
 3. Obtain the missed source export through its approved channel, preserve its original file, and place it in `<root>/landing/` with the contracted feed prefix.
-4. Run `make demo` only for the golden fixture; for an existing repair root run `.venv/bin/python -m construction_data_platform.cli run --root <root>`.
+4. Run `make demo` only for the golden fixture; for an existing repair root run `.venv/bin/python -m enterprise_data_platform.cli run --root <root>`.
 5. Confirm the run succeeded, expected records appear with source provenance, the invoice exceptions transition as expected, and the pointer now names the new generation. Keep the previous generation for audit comparison.
 
 ## Schema incompatibility

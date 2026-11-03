@@ -1,4 +1,4 @@
-"""Lakeflow Jobs entrypoint. The target volume contains synthetic files and Delta paths."""
+"""Construction example Lakeflow Jobs entrypoint for synthetic files and Delta paths."""
 
 from __future__ import annotations
 
@@ -11,8 +11,8 @@ from pyspark.sql import SparkSession
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from construction_data_platform.generator import generate
-from construction_data_platform.pipeline import run_pipeline
+from enterprise_data_platform.domains.construction.generator import generate
+from enterprise_data_platform.domains.construction.pipeline import run_pipeline
 
 
 def main() -> None:

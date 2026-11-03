@@ -1,6 +1,6 @@
-# Source contracts
+# Construction example source contracts
 
-These are fictional, explicit interfaces to implement and version. Choose precise types/nullability in code and export a data dictionary. Source prefixes/company identifiers are part of business keys. Use string identifiers, UTC timestamps, decimal weights/money, and enumerated units/statuses. Business date is derived using the project's configured timezone, initially America/Chicago.
+These are fictional interfaces for the construction reference example. The implemented subset and table grains are recorded in `docs/SOURCE_CONTRACTS_IMPLEMENTED.md` and `docs/DATA_DICTIONARY.md`. Source prefixes/company identifiers are part of business keys. Use string identifiers, UTC timestamps, decimal weights/money, and enumerated units/statuses. Business date is derived using the project's configured timezone, initially America/Chicago.
 
 ## Common envelope
 Every source record has source_system, company_id, schema_version, source_record_id, source_revision, source_updated_at, and event_time. At ingestion add source_file, file_content_hash, payload_hash, ingested_at, and ingestion_batch_id. Corrections use a new revision with the same source business key. Retries may carry identical content in differently named files. Equal key/revision with different payload is a conflict, never an arbitrary last-write win. Record deletes/cancellations explicitly.

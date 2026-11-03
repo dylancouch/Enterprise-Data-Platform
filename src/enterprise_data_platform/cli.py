@@ -1,4 +1,4 @@
-"""Small command line interface for the synthetic Milestone 1 demo."""
+"""Command line interface for the synthetic construction and SaaS examples."""
 
 from __future__ import annotations
 
@@ -7,25 +7,31 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
-from .generator import generate
-from .pipeline import run_pipeline
+from .domains.construction.generator import generate
+from .domains.construction.pipeline import run_pipeline
+from .domains.saas import walkthrough
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="cdp", description="Synthetic construction purchasing/delivery/invoice demo")
+    parser = argparse.ArgumentParser(prog="edp", description="Enterprise Data Platform synthetic domain demos")
     sub = parser.add_subparsers(dest="command", required=True)
-    gen = sub.add_parser("generate", help="generate synthetic source feeds and a separate expected fixture")
+    gen = sub.add_parser("generate", help="generate construction feeds and a separate expected fixture")
     gen.add_argument("--root", type=Path, default=Path("data/demo"))
     gen.add_argument("--scenario", choices=["golden", "ticket-correction", "duplicate-replay", "invalid-unit", "late-po", "late-receipt"], default="golden")
     gen.add_argument("--seed", type=int, default=1729)
-    run = sub.add_parser("run", help="ingest and transform landing files with Spark and Delta")
+    run = sub.add_parser("run", help="ingest and transform construction feeds with Spark and Delta")
     run.add_argument("--root", type=Path, default=Path("data/demo"))
-    demo = sub.add_parser("demo", help="generate and run a synthetic scenario")
+    demo = sub.add_parser("demo", help="generate and run a synthetic construction scenario")
     demo.add_argument("--root", type=Path, default=Path("data/demo"))
     demo.add_argument("--scenario", choices=["golden", "ticket-correction", "duplicate-replay", "invalid-unit", "late-po", "late-receipt"], default="golden")
-    report = sub.add_parser("report", help="print the last published synthetic run report")
+    report = sub.add_parser("report", help="print the last published construction run report")
     report.add_argument("--root", type=Path, default=Path("data/demo"))
+    saas = sub.add_parser("saas-demo", help="run the synthetic SaaS usage and billing recovery walkthrough")
+    saas.add_argument("--root", type=Path, default=Path("data/saas-demo"))
     args = parser.parse_args()
+    if args.command == "saas-demo":
+        print(json.dumps(walkthrough(args.root), indent=2, default=str))
+        return
     if args.command == "report":
         pointer_path = args.root / "tables" / "gold" / "current_generation.json"
         pointer = json.loads(pointer_path.read_text(encoding="utf-8"))

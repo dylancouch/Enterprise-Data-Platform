@@ -6,15 +6,16 @@ import json
 import tempfile
 from pathlib import Path
 
-from construction_data_platform.generator import generate
-from construction_data_platform.pipeline import create_spark, run_pipeline
+from enterprise_data_platform.core import create_spark
+from enterprise_data_platform.domains.construction.generator import generate
+from enterprise_data_platform.domains.construction.pipeline import run_pipeline
 
 
 def main() -> None:
-    with tempfile.TemporaryDirectory(prefix="cdp-recovery-demo-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="edp-recovery-demo-") as temporary:
         root = Path(temporary) / "synthetic"
         generate(root, "golden")
-        spark = create_spark("construction-data-platform-recovery-demo")
+        spark = create_spark("enterprise-data-platform-recovery-demo")
         try:
             initial = run_pipeline(root, spark)
             generate(root, "ticket-correction")

@@ -8,15 +8,15 @@ from pathlib import Path
 import pytest
 from pyspark.sql import SparkSession
 
-from construction_data_platform.generator import generate
-from construction_data_platform.pipeline import run_pipeline
+from enterprise_data_platform.domains.construction.generator import generate
+from enterprise_data_platform.domains.construction.pipeline import run_pipeline
 
 
 @pytest.fixture(scope="session")
 def spark() -> SparkSession:
-    from construction_data_platform.pipeline import create_spark
+    from enterprise_data_platform.core import create_spark
 
-    session = create_spark("construction-data-platform-tests")
+    session = create_spark("enterprise-data-platform-tests")
     yield session
     session.stop()
 

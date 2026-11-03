@@ -1,4 +1,4 @@
-# Demonstration business rules
+# Construction example business rules
 
 These are configurable project assumptions, not Michels policies. Implement and test them before adding scope.
 

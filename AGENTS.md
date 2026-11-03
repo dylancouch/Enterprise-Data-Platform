@@ -1,6 +1,8 @@
-# construction-data-platform
+# Enterprise Data Platform
 
-Read PROJECT_BRIEF.md, docs/SOURCE_CONTRACTS.md, docs/BUSINESS_RULES.md, docs/ACCEPTANCE_TESTS.md, and docs/STATUS.md before implementation. Use the agreed name and description verbatim in project-facing metadata.
+A Spark and Delta data platform for integrating operational sources, publishing trustworthy analytics, and monitoring pipeline health across industries.
+
+Read PROJECT_BRIEF.md, docs/PLATFORM_CONTRACT.md, docs/SOURCE_CONTRACTS.md, docs/BUSINESS_RULES.md, docs/ACCEPTANCE_TESTS.md, and docs/STATUS.md before implementation. Use the agreed name and description verbatim in project-facing metadata. The construction contracts and rules are one domain example; the SaaS contract is in docs/SAAS_CONTRACT.md.
 
 ## Working agreements
 - Implement working milestones; begin with Milestone 1. Do not stop at a plan, directory scaffold, notebook, or dashboard mock.

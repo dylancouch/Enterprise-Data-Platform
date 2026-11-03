@@ -8,6 +8,8 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
+from enterprise_data_platform import PROJECT_DESCRIPTION, PROJECT_NAME
+
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -61,18 +63,19 @@ def main() -> None:
         )
     run_status = str(report.get("status", "UNKNOWN"))
     published = report.get("published") is True
-    publication_text = (f"Consumers should resolve all products through {report.get('publication_pointer', 'the current-generation pointer')}; "
+    pointer_display = "tables/gold/current_generation.json"
+    publication_text = (f"Consumers should resolve all products through {pointer_display}; "
                         f"it names generation {report.get('generation', 'unknown')}." if published else
                         "This run did not publish. Consumers must continue using the last successful generation.")
     source_summary = f"{len(arrived)} of {len(freshness)} expected feeds arrived; {len(missing)} missing and {len(stale)} stale."
     content = f"""<!doctype html>
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Synthetic data pipeline operations report</title>
+<title>{PROJECT_NAME} — synthetic construction operations</title>
 <style>
 body{{font:16px/1.5 system-ui,sans-serif;background:#f4f6f8;color:#18212b;margin:0}}main{{max-width:1050px;margin:2rem auto;padding:0 1rem}}header,.card{{background:white;border:1px solid #dce2e8;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}}.banner{{color:#7b3300;background:#fff0df;border-color:#edc59f;font-weight:700}}.metrics{{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem}}.metric{{font-size:1.7rem;font-weight:700}}table{{border-collapse:collapse;width:100%}}th,td{{padding:.55rem;text-align:left;border-bottom:1px solid #e5e9ed}}th{{background:#eef2f5}}small,.muted{{color:#52606d}}h1,h2{{line-height:1.2}}
 </style><main>
 <header class="banner">SYNTHETIC DEMONSTRATION DATA — fictional project and source records</header>
-<header><h1>Data pipeline operations report</h1><p><strong>Run outcome: {html.escape(run_status)}</strong> · Published: {'yes' if published else 'no'}</p><p>{html.escape(publication_text)}</p><p class="muted">Run {html.escape(str(report.get('run_id', 'unknown')))} started {html.escape(str(report.get('started_at_utc', 'unknown')))} and finished {html.escape(str(report.get('finished_at_utc', 'unknown')))} · Report exported {html.escape(generated)}</p></header>
+<header><h1>{PROJECT_NAME}: construction example</h1><p>{PROJECT_DESCRIPTION}</p><p><strong>Run outcome: {html.escape(run_status)}</strong> · Published: {'yes' if published else 'no'}</p><p>{html.escape(publication_text)}</p><p class="muted">Run {html.escape(str(report.get('run_id', 'unknown')))} started {html.escape(str(report.get('started_at_utc', 'unknown')))} and finished {html.escape(str(report.get('finished_at_utc', 'unknown')))} · Report exported {html.escape(generated)}</p></header>
 <section class="card"><h2>Source arrival and freshness</h2><p>{html.escape(source_summary)}</p><p>Arrived: {', '.join(html.escape(str(row['source_feed']).replace('_', ' ')) for row in arrived) or 'none'}.</p><p>Missing: {', '.join(html.escape(str(row['source_feed']).replace('_', ' ')) for row in missing) or 'none'}.</p><p>Stale: {', '.join(html.escape(str(row['source_feed']).replace('_', ' ')) for row in stale) or 'none'}.</p></section>
 <section class="card"><h2>What changed</h2><p>{change_summary}</p></section>
 <section class="metrics"><article class="card"><div class="metric">{total_quantity:.3f} t</div>Accepted net quantity</article><article class="card"><div class="metric">{len(exceptions)}</div>Invoice exceptions</article><article class="card"><div class="metric">{int(report.get('quarantine_rows', 0))}</div>Quarantined source rows</article><article class="card"><div class="metric">{int(report.get('duplicate_business_envelopes_suppressed', 0))}</div>Replay duplicates suppressed</article></section>
