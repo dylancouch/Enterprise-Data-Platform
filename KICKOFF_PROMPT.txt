@@ -1,1 +1,0 @@
-Enterprise Data Platform is an implemented Spark/Delta portfolio project with synthetic construction and SaaS examples. Read AGENTS.md, PROJECT_BRIEF.md, docs/PLATFORM_CONTRACT.md, and docs/STATUS.md before continuing work. Preserve domain contracts and run the relevant local checks. Do not claim Databricks workspace verification without an actual authenticated run.

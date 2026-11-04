@@ -13,18 +13,18 @@ from pyspark.sql import SparkSession, Window
 from pyspark.sql import functions as F
 from pyspark.sql import types as T
 
-from edp import PROJECT_DESCRIPTION, PROJECT_NAME
-from edp.core import (
+from project_info import PROJECT_DESCRIPTION, PROJECT_NAME
+from spark_delta import (
     create_spark,
     freshness_status,
     latest_revision,
     merge_raw,
     publish_generation,
 )
-from edp.core import (
+from spark_delta import (
     read_delta as _read_delta,
 )
-from edp.core import (
+from spark_delta import (
     write_delta as _write_delta,
 )
 

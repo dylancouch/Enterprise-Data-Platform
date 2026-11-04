@@ -6,9 +6,9 @@ import json
 import tempfile
 from pathlib import Path
 
-from edp.core import create_spark
-from edp.domains.construction.generator import generate
-from edp.domains.construction.pipeline import run_pipeline
+from construction_generator import generate
+from construction_pipeline import run_pipeline
+from spark_delta import create_spark
 
 
 def main() -> None:

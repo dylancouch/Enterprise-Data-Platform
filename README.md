@@ -4,7 +4,7 @@ A Spark and Delta data platform for integrating operational sources, publishing 
 
 This portfolio project uses **synthetic operational data only**. It demonstrates shared source ingestion, revision and replay handling, freshness assessment, and complete report publication across two independent examples: construction purchasing/delivery/invoices and SaaS usage/billing. Both use local PySpark and Delta. The versioned Databricks bundle targets the construction example; workspace validation and execution are pending because no workspace authentication is configured in this environment. The project is not connected to a real contractor or software provider.
 
-The reusable code is in `edp/core.py`. Domain-specific contracts and calculations are in `edp/domains/`; see [the shared contract](docs/PLATFORM_CONTRACT.md), [construction contracts](docs/SOURCE_CONTRACTS.md), [SaaS contract](docs/SAAS_CONTRACT.md), and [the extension guide](docs/EXTENDING.md). Adding another domain requires its own source contract and business rules.
+The shared Spark/Delta mechanics are in `spark_delta.py`. `construction_pipeline.py` and `saas_pipeline.py` contain the example-specific logic; `construction_generator.py` creates synthetic construction inputs. Run them through `cli.py`. See [the shared contract](docs/PLATFORM_CONTRACT.md), [construction contracts](docs/SOURCE_CONTRACTS.md), [SaaS contract](docs/SAAS_CONTRACT.md), and [the extension guide](docs/EXTENDING.md).
 
 | Synthetic example | Sources and decision product | Operational behavior shown |
 | --- | --- | --- |
@@ -30,12 +30,12 @@ The installed CLI exposes the same examples as `.venv/bin/edp demo --root data/d
 Other commands:
 
 ```bash
-.venv/bin/python -m edp.cli generate --root data/correction --scenario ticket-correction
-.venv/bin/python -m edp.cli run --root data/correction
-.venv/bin/python -m edp.cli generate --root data/late-receipt --scenario late-receipt
-.venv/bin/python -m edp.cli run --root data/late-receipt
+.venv/bin/python -m cli generate --root data/correction --scenario ticket-correction
+.venv/bin/python -m cli run --root data/correction
+.venv/bin/python -m cli generate --root data/late-receipt --scenario late-receipt
+.venv/bin/python -m cli run --root data/late-receipt
 mv data/late-receipt/deferred/site_receipts_late_arrival.csv data/late-receipt/landing/
-.venv/bin/python -m edp.cli run --root data/late-receipt
+.venv/bin/python -m cli run --root data/late-receipt
 make test
 make lint
 ```
@@ -44,7 +44,7 @@ See [docs/STATUS.md](docs/STATUS.md) for exact environment setup, executed check
 
 ## Reports and recovery
 
-The latest synthetic run report is available with `.venv/bin/python -m edp.cli report --root data/demo`. Export a self-contained snapshot of the current published run with `.venv/bin/python scripts/render-report.py --root data/demo`; the report leads with run outcome, the consumer publication pointer, arrived/missing/stale sources, and changes from the prior successful generation. See [`reports/synthetic-dashboard.html`](reports/synthetic-dashboard.html). Run `.venv/bin/python scripts/demo-recovery.py` (or `make recovery-demo`) to demonstrate a ticket correction, interruption between product writes, retention of the previous publication, and successful restart.
+The latest synthetic run report is available with `.venv/bin/python -m cli report --root data/demo`. Export a self-contained snapshot of the current published run with `.venv/bin/python scripts/render-report.py --root data/demo`; the report leads with run outcome, the consumer publication pointer, arrived/missing/stale sources, and changes from the prior successful generation. See [`reports/synthetic-dashboard.html`](reports/synthetic-dashboard.html). Run `.venv/bin/python scripts/demo-recovery.py` (or `make recovery-demo`) to demonstrate a ticket correction, interruption between product writes, retention of the previous publication, and successful restart.
 
 ## SaaS usage and billing example
 
@@ -52,4 +52,4 @@ Run `make saas-demo` to reconcile metered software usage against a customer invo
 
 See the [recovery runbook](docs/RUNBOOK.md), [governance limits](docs/GOVERNANCE.md), [architecture](docs/ARCHITECTURE.md), and [design decisions](docs/DESIGN_DECISIONS.md).
 
-Reproduce the local allocation experiment with `BENCHMARK_ARGS='--allocations-per-delivery 16' make benchmark`; its sanitized output is in [`evidence/milestone4-allocation-benchmark.json`](evidence/milestone4-allocation-benchmark.json). It records an input-reduction result but does not demonstrate a meaningful runtime gain.
+Reproduce the local allocation experiment with `BENCHMARK_ARGS='--allocations-per-delivery 16' make benchmark`; its sanitized output is in [`evidence/archive/milestone4-allocation-benchmark.json`](evidence/archive/milestone4-allocation-benchmark.json). It records an input-reduction result but does not demonstrate a meaningful runtime gain.

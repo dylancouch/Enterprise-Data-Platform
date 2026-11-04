@@ -8,13 +8,13 @@ from pathlib import Path
 import pytest
 from pyspark.sql import SparkSession
 
-from edp.domains.construction.generator import generate
-from edp.domains.construction.pipeline import run_pipeline
+from construction_generator import generate
+from construction_pipeline import run_pipeline
 
 
 @pytest.fixture(scope="session")
 def spark() -> SparkSession:
-    from edp.core import create_spark
+    from spark_delta import create_spark
 
     session = create_spark("enterprise-data-platform-tests")
     yield session

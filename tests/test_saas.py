@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 
-from edp.core import create_spark
-from edp.domains.saas import _initial_inputs, run
+from saas_pipeline import _initial_inputs, run
+from spark_delta import create_spark
 
 
 def test_conflicting_equal_revision_keeps_last_good_generation(tmp_path: Path) -> None:

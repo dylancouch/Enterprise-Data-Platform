@@ -22,7 +22,7 @@ jobs:
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -e '.[dev]'
       - run: mkdir -p .cache/ivy .cache/spark-tmp
-      - run: ruff check edp tests scripts
-      - run: python -m compileall -q edp tests scripts
+      - run: ruff check *.py tests scripts
+      - run: python -m compileall -q cli.py project_info.py spark_delta.py construction_generator.py construction_pipeline.py saas_pipeline.py databricks_entry.py tests scripts
       - run: pytest
-      - run: python -m edp.cli saas-demo --root data/saas-ci
+      - run: python -m cli saas-demo --root data/saas-ci

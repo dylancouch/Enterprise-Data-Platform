@@ -14,8 +14,8 @@ from pathlib import Path
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
-from edp import PROJECT_DESCRIPTION, PROJECT_NAME
-from edp.core import (
+from project_info import PROJECT_DESCRIPTION, PROJECT_NAME
+from spark_delta import (
     create_spark,
     freshness_status,
     latest_revision,

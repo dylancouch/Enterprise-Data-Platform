@@ -37,7 +37,7 @@ resources:
         - task_key: synthetic_demo
           max_retries: 1
           spark_python_task:
-            python_file: ./edp/databricks_entry.py
+            python_file: ./databricks_entry.py
             parameters:
               - --root
               - /Volumes/${var.catalog}/${var.schema}/enterprise_data
