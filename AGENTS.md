@@ -5,6 +5,7 @@ A Spark and Delta data platform for integrating operational sources, publishing 
 Read PROJECT_BRIEF.md, docs/PLATFORM_CONTRACT.md, docs/SOURCE_CONTRACTS.md, docs/BUSINESS_RULES.md, docs/ACCEPTANCE_TESTS.md, and docs/STATUS.md before implementation. Use the agreed name and description verbatim in project-facing metadata. The construction contracts and rules are one domain example; the SaaS contract is in docs/SAAS_CONTRACT.md.
 
 ## Working agreements
+- Keep the installable Python package at the repository root as `edp/`. Do not create a `src/` tree or a project-name package directory.
 - Implement working milestones; begin with Milestone 1. Do not stop at a plan, directory scaffold, notebook, or dashboard mock.
 - Make routine design decisions independently. Install project dependencies in an isolated environment, inspect the actual host, and continue independent work through external blockers.
 - Databricks, PySpark, SQL, and Delta Lake are core requirements. Do not replace the implementation with a pandas-only simulation. Use small local Spark/Delta tests plus actual Databricks integration where access permits.

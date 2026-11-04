@@ -12,7 +12,7 @@ from pathlib import Path
 
 from pyspark.sql import functions as F
 
-from enterprise_data_platform.core import create_spark
+from edp.core import create_spark
 
 
 def main() -> None:

@@ -6,9 +6,9 @@ import json
 import tempfile
 from pathlib import Path
 
-from enterprise_data_platform.core import create_spark
-from enterprise_data_platform.domains.construction.generator import generate
-from enterprise_data_platform.domains.construction.pipeline import run_pipeline
+from edp.core import create_spark
+from edp.domains.construction.generator import generate
+from edp.domains.construction.pipeline import run_pipeline
 
 
 def main() -> None:

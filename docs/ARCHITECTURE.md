@@ -1,6 +1,6 @@
 # Platform architecture and report contract
 
-All example feeds and outputs are synthetic. Both examples use the shared mechanics in `src/enterprise_data_platform/core.py`. Each domain declares its own feeds and reconciliation rules. The construction run reads only six named source prefixes from `landing/`; expected answers and scenario manifests remain outside that prefix.
+All example feeds and outputs are synthetic. Both examples use the shared mechanics in `edp/core.py`. Each domain declares its own feeds and reconciliation rules. The construction run reads only six named source prefixes from `landing/`; expected answers and scenario manifests remain outside that prefix.
 
 ```mermaid
 flowchart LR
@@ -17,6 +17,6 @@ In the construction example, bronze stores what arrived, including source file h
 
 ## Consumer queries
 
-For the local CLI use `.venv/bin/python -m enterprise_data_platform.cli report --root <root>` to resolve the active generation and print a synthetic report. The Delta products are also readable through PySpark using paths under `tables/gold/generations/<generation>/`. Workspace SQL registration and dashboard execution are not configured. Keep a single generation ID across all products in a consumer query. `scripts/render-report.py` exports the actual latest run report as a self-contained synthetic HTML report; it does not query Delta independently or claim live freshness.
+For the local CLI use `.venv/bin/python -m edp.cli report --root <root>` to resolve the active generation and print a synthetic report. The Delta products are also readable through PySpark using paths under `tables/gold/generations/<generation>/`. Workspace SQL registration and dashboard execution are not configured. Keep a single generation ID across all products in a consumer query. `scripts/render-report.py` exports the actual latest run report as a self-contained synthetic HTML report; it does not query Delta independently or claim live freshness.
 
 Construction daily quantity grain: project, material, project-local receipt date; measure: accepted net metric tonnes. Construction invoice exception grain: invoice line; exception rows carry the source invoice, PO, allocation, and delivery evidence. Net invoice amount grain: company, supplier, currency; credits use positive source amounts and signed negative reporting values. The SaaS reconciliation grain is customer and billing period for the single-invoice example. No product initiates payments.

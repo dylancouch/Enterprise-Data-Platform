@@ -11,8 +11,8 @@ from pyspark.sql import SparkSession
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from enterprise_data_platform.domains.construction.generator import generate
-from enterprise_data_platform.domains.construction.pipeline import run_pipeline
+from edp.domains.construction.generator import generate
+from edp.domains.construction.pipeline import run_pipeline
 
 
 def main() -> None:

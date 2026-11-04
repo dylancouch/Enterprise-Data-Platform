@@ -8,7 +8,7 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
-from enterprise_data_platform import PROJECT_DESCRIPTION, PROJECT_NAME
+from edp import PROJECT_DESCRIPTION, PROJECT_NAME
 
 
 def main() -> None:

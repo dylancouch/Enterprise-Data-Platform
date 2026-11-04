@@ -1,6 +1,6 @@
 # Shared platform contract
 
-Enterprise Data Platform is a local Spark/Delta demonstration with Databricks as its intended execution target. Every example uses synthetic data. The shared code in `src/enterprise_data_platform/core.py` supplies Spark setup, Delta reads/writes, raw replay merging, revision selection, a 72-hour demonstration freshness assessment, and a local generation pointer.
+Enterprise Data Platform is a local Spark/Delta demonstration with Databricks as its intended execution target. Every example uses synthetic data. The shared code in `edp/core.py` supplies Spark setup, Delta reads/writes, raw replay merging, revision selection, a 72-hour demonstration freshness assessment, and a local generation pointer.
 
 ## Domain boundary
 

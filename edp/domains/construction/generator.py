@@ -8,7 +8,7 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
-from enterprise_data_platform import PROJECT_DESCRIPTION, PROJECT_NAME
+from edp import PROJECT_DESCRIPTION, PROJECT_NAME
 
 SCHEMA_VERSION = "1.0"
 SEED = 1729
@@ -86,6 +86,6 @@ def generate(root: Path, scenario: str = "golden", seed: int = SEED) -> dict[str
         arrivals["purchase_order_lines"] = "deferred/purchase_order_lines_late_arrival.csv; deliver after the first run"
     manifest = {"synthetic": True, "project": PROJECT_NAME, "description": PROJECT_DESCRIPTION, "domain": "construction", "scenario": scenario, "seed": seed, "contract_version": SCHEMA_VERSION, "generated_at_utc": now, "arrival_schedule": arrivals, "files": files, "deferred_files": deferred_files}
     (expected / "scenario_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-    oracle_path = Path(__file__).resolve().parents[4] / "fixtures" / "golden_oracle.json"
+    oracle_path = Path(__file__).resolve().parents[3] / "fixtures" / "golden_oracle.json"
     (expected / "golden_oracle.json").write_text(oracle_path.read_text(encoding="utf-8"), encoding="utf-8")
     return manifest

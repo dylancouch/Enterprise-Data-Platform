@@ -11,7 +11,7 @@ from pyspark.sql import functions as F
 
 
 def create_spark(app_name: str = "enterprise-data-platform") -> SparkSession:
-    project_root = Path(__file__).resolve().parents[2]
+    project_root = Path(__file__).resolve().parents[1]
     builder = SparkSession.builder.appName(app_name)
     if "DATABRICKS_RUNTIME_VERSION" in __import__("os").environ:
         return builder.getOrCreate()
