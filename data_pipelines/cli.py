@@ -7,9 +7,9 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
-from construction_generator import generate
-from construction_pipeline import run_pipeline
-from saas_pipeline import walkthrough
+from data_pipelines.construction_generator import generate
+from data_pipelines.construction_pipeline import run_pipeline
+from data_pipelines.saas_pipeline import walkthrough
 
 
 def main() -> None:

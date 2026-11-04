@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 
-from saas_pipeline import _initial_inputs, run
-from spark_delta import create_spark
+from data_pipelines.saas_pipeline import _initial_inputs, run
+from data_pipelines.spark_delta import create_spark
 
 
 def test_conflicting_equal_revision_keeps_last_good_generation(tmp_path: Path) -> None:

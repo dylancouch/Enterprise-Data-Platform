@@ -1,6 +1,6 @@
 # Add an operational data example
 
-The two current examples show how to reuse platform mechanics while keeping business rules visible. Add a descriptively named pipeline module at the repository root, alongside `construction_pipeline.py` and `saas_pipeline.py`, with its own source contract and synthetic fixture. `spark_delta.py` is a small shared library, not a configuration-only pipeline generator.
+The two current examples show how to reuse platform mechanics while keeping business rules visible. Add a descriptively named module inside `data_pipelines/`, alongside `construction_pipeline.py` and `saas_pipeline.py`, with its own source contract and synthetic fixture. `data_pipelines/spark_delta.py` is a small shared library, not a configuration-only pipeline generator.
 
 1. Define each feed's grain, business key, revision, update time, units, expected arrival, and acceptable schema changes. Keep expected answers outside landing inputs.
 2. Read only declared landing prefixes. Attach source file and content hash before calling `merge_raw` in `spark_delta`. Choose replay keys that retain distinct business revisions and do not erase conflicting evidence.

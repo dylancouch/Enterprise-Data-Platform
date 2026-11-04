@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 from pyspark.sql import SparkSession
 
-from construction_generator import generate
-from construction_pipeline import run_pipeline
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from data_pipelines.construction_generator import generate
+from data_pipelines.construction_pipeline import run_pipeline
 
 
 def main() -> None:

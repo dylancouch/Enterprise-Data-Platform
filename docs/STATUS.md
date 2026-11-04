@@ -1,6 +1,6 @@
 # Project status
 
-Enterprise Data Platform is a synthetic local Spark/Delta demonstration with two examples. Construction purchasing, delivery, and invoices produce accepted-quantity and invoice-exception reports. SaaS usage and billing produce a usage-to-invoice reconciliation. Both use shared replay, revision, freshness, and complete-generation publication mechanics in `spark_delta.py`.
+Enterprise Data Platform is a synthetic local Spark/Delta demonstration with two examples. Construction purchasing, delivery, and invoices produce accepted-quantity and invoice-exception reports. SaaS usage and billing produce a usage-to-invoice reconciliation. Both use shared replay, revision, freshness, and complete-generation publication mechanics in `data_pipelines/spark_delta.py`.
 
 ## Reproduce locally
 
@@ -12,7 +12,7 @@ make test
 make lint
 ```
 
-The runnable entrypoints are `cli.py` (installed command `edp`) and `databricks_entry.py` for the construction job. `make demo` writes under ignored `data/demo/`; `make saas-demo` creates a timestamped ignored folder under `data/saas-demo/`. Source truth and expected values stay outside landing inputs.
+The runnable entrypoints are `data_pipelines/cli.py` (installed command `edp`) and `data_pipelines/databricks_entry.py` for the construction job. `make demo` writes under ignored `data/demo/`; `make saas-demo` creates a timestamped ignored folder under `data/saas-demo/`. Source truth and expected values stay outside landing inputs.
 
 ## Evidence
 
@@ -21,7 +21,7 @@ The runnable entrypoints are `cli.py` (installed command `edp`) and `databricks_
 - [Recovery run](../evidence/archive/milestone3-local-recovery.json): an interrupted construction correction retained the last-good generation; restart published nine tonnes and one invoice exception.
 - [Allocation experiment](../evidence/archive/milestone4-allocation-benchmark.json): reduced join input, but no established runtime improvement. Earlier milestone snapshots are retained in `evidence/archive/`.
 
-Before the current file-layout cleanup, local PySpark 4.0.1 and Delta Lake 4.0.0 checks passed 18 construction acceptance tests plus one focused SaaS conflict test. The [hosted run](https://github.com/dylancouch/enterprise-data-platform/actions/runs/41766154888) passed all 19 tests and the SaaS CLI smoke check for the earlier package layout. For the current flat layout, the editable install, Ruff, Python compilation, installed CLI help, Databricks entrypoint help, entrypoint metadata, bundle path assertion, and `git diff --check` passed. The Spark test suite has not been rerun for this layout change.
+Before the layout changes, local PySpark 4.0.1 and Delta Lake 4.0.0 checks passed 18 construction acceptance tests plus one focused SaaS conflict test. The [hosted run](https://github.com/dylancouch/enterprise-data-platform/actions/runs/41766154888) passed all 19 tests and the SaaS CLI smoke check for the earlier package layout. For the current `data_pipelines/` layout, the editable install, Ruff, Python compilation, installed CLI help from inside and outside the checkout, Databricks entrypoint help, entrypoint metadata, bundle path assertion, and `git diff --check` passed. The Spark test suite has not been rerun for this layout change.
 
 ## Limits and next task
 

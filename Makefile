@@ -12,18 +12,18 @@ install:
 
 demo:
 	mkdir -p .home .cache/ivy .cache/spark-tmp
-	.venv/bin/python -m cli demo --root data/demo --scenario golden
+	.venv/bin/python -m data_pipelines.cli demo --root data/demo --scenario golden
 
 saas-demo:
 	mkdir -p .home .cache/ivy .cache/spark-tmp
-	.venv/bin/python -m cli saas-demo --root data/saas-demo
+	.venv/bin/python -m data_pipelines.cli saas-demo --root data/saas-demo
 
 test:
 	mkdir -p .home .cache/ivy .cache/spark-tmp
 	.venv/bin/pytest $(TEST_ARGS)
 
 lint:
-	.venv/bin/ruff check *.py tests scripts
+	.venv/bin/ruff check data_pipelines tests scripts
 
 recovery-demo:
 	@.venv/bin/python scripts/demo-recovery.py

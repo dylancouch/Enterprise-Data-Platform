@@ -13,10 +13,10 @@ dependencies = ["pyspark==4.0.1", "delta-spark==4.0.0", "pyyaml>=6,<7"]
 dev = ["pytest>=8.3,<9", "ruff>=0.14,<1"]
 
 [project.scripts]
-edp = "cli:main"
+edp = "data_pipelines.cli:main"
 
 [tool.setuptools]
-py-modules = ["cli", "project_info", "spark_delta", "construction_generator", "construction_pipeline", "saas_pipeline", "databricks_entry"]
+packages = ["data_pipelines"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

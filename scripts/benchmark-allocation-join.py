@@ -12,7 +12,7 @@ from pathlib import Path
 
 from pyspark.sql import functions as F
 
-from spark_delta import create_spark
+from data_pipelines.spark_delta import create_spark
 
 
 def main() -> None:

@@ -1,10 +1,10 @@
 # Shared platform contract
 
-Enterprise Data Platform is a local Spark/Delta demonstration with Databricks as its intended execution target. Every example uses synthetic data. The shared code in `spark_delta.py` supplies Spark setup, Delta reads/writes, raw replay merging, revision selection, a 72-hour demonstration freshness assessment, and a local generation pointer.
+Enterprise Data Platform is a local Spark/Delta demonstration with Databricks as its intended execution target. Every example uses synthetic data. The shared code in `data_pipelines/spark_delta.py` supplies Spark setup, Delta reads/writes, raw replay merging, revision selection, a 72-hour demonstration freshness assessment, and a local generation pointer.
 
 ## Domain boundary
 
-A domain supplies its own source schemas, business keys, revision fields, validation and reconciliation rules, report grains, and fixtures. The examples are `construction_pipeline.py` and `saas_pipeline.py`. A new domain can reuse the shared mechanics, but must implement and verify its own business semantics. The existing two domains are examples, not a no-code ingestion framework.
+A domain supplies its own source schemas, business keys, revision fields, validation and reconciliation rules, report grains, and fixtures. The examples are `data_pipelines/construction_pipeline.py` and `data_pipelines/saas_pipeline.py`. A new domain can reuse the shared mechanics, but must implement and verify its own business semantics. The existing two domains are examples, not a no-code ingestion framework.
 
 ## Run and publication behavior
 
