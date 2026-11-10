@@ -556,9 +556,35 @@ def run_pipeline(root: Path, spark: SparkSession | None = None, fail_after_produ
         _write_delta(product, staged / name)
         product_counts[name] = product.count()
         if fail_after_product == name:
+            pointer_path = store / "gold" / "current_generation.json"
+            last_good = (json.loads(pointer_path.read_text(encoding="utf-8"))["generation"]
+                         if pointer_path.exists() else None)
+            report = {
+                "project": PROJECT_NAME,
+                "description": PROJECT_DESCRIPTION,
+                "domain": "construction",
+                "synthetic": True,
+                "run_id": run_id,
+                "status": "FAILED_INJECTED",
+                "published": False,
+                "generation": None,
+                "staged_generation": generation,
+                "last_good_generation": last_good,
+                "started_at_utc": started,
+                "finished_at_utc": datetime.now(UTC).isoformat(),
+                "source_rows_by_feed": counts,
+                "duplicate_business_envelopes_suppressed": duplicates,
+                "source_freshness": [row.asDict(recursive=True) for row in source_freshness.collect()],
+                "products_written": product_counts,
+                "publication_pointer": str(pointer_path),
+            }
+            evidence_dir = root / "evidence" / "runs"
+            evidence_dir.mkdir(parents=True, exist_ok=True)
+            (evidence_dir / f"{run_id}.json").write_text(
+                json.dumps(report, indent=2, default=str) + "\n", encoding="utf-8")
             if owns_spark:
                 spark.stop()
-            return {"run_id": run_id, "status": "FAILED_INJECTED", "generation": generation, "published": False, "products_written": product_counts}
+            return report
     if exception_rows is None:
         exception_rows = spark.createDataFrame([], T.StructType([T.StructField("exception_reason", T.StringType())]))
         _write_delta(exception_rows, staged / "invoice_exceptions")

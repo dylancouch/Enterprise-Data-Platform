@@ -13,6 +13,7 @@ from pathlib import Path
 
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
+from pyspark.sql import types as T
 
 from data_pipelines import PROJECT_DESCRIPTION, PROJECT_NAME
 from data_pipelines.spark_delta import (
@@ -81,6 +82,12 @@ def run(root: Path, spark: SparkSession, fail_before_publish: bool = False) -> d
         duplicates_suppressed += retry_duplicates
         if combined is None:
             freshness.append({"feed": feed, "status": "MISSING_EXPECTED_FILE", "files": 0, "rows": 0, "latest_update": None})
+            fields = [T.StructField(key, T.StringType()), T.StructField("customer_id", T.StringType()),
+                      T.StructField("period", T.StringType())]
+            fields.extend([T.StructField("units", T.StringType())] if feed == "usage" else
+                          [T.StructField("billed_units", T.StringType()), T.StructField("unit_price", T.StringType()),
+                           T.StructField("currency", T.StringType())])
+            frames[feed] = spark.createDataFrame([], T.StructType(fields))
             continue
         conflicting = (combined.groupBy(key, "revision")
             .agg(F.countDistinct("_payload_hash").alias("payload_count"))

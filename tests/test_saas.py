@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -32,5 +33,26 @@ def test_conflicting_equal_revision_keeps_last_good_generation(tmp_path: Path) -
             run(root, spark)
         assert first["generation"] == original
         assert json.loads(pointer_path.read_text(encoding="utf-8"))["generation"] == original
+    finally:
+        spark.stop()
+
+
+def test_late_invoice_is_reported_then_reconciled(tmp_path: Path) -> None:
+    root = tmp_path / "saas-late-invoice"
+    _initial_inputs(root)
+    deferred = root / "deferred"
+    deferred.mkdir()
+    shutil.move(str(root / "landing/invoices_batch_001.csv"), str(deferred / "invoices_batch_001.csv"))
+    spark = create_spark("enterprise-data-platform-saas-late-invoice")
+    try:
+        pending = run(root, spark)
+        assert pending["reconciliation"][0]["exception"] == "MISSING_INVOICE"
+        assert next(row for row in pending["source_freshness"] if row["feed"] == "invoices")["status"] == "MISSING_EXPECTED_FILE"
+        previous = json.loads((root / "tables/gold/current_generation.json").read_text())["generation"]
+        shutil.move(str(deferred / "invoices_batch_001.csv"), str(root / "landing/invoices_batch_001.csv"))
+        arrived = run(root, spark)
+        assert arrived["reconciliation"][0]["billed_units"] == 190
+        assert arrived["reconciliation"][0]["exception"] == "BILLED_USAGE_MISMATCH"
+        assert arrived["generation"] != previous
     finally:
         spark.stop()

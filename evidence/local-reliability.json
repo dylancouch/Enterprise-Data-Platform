@@ -1,0 +1,225 @@
+{
+  "synthetic": true,
+  "project": "Enterprise Data Platform",
+  "description": "A Spark and Delta data platform for integrating operational sources, publishing trustworthy analytics, and monitoring pipeline health across industries.",
+  "verification": "local Spark/Delta",
+  "verified_at_utc": "2026-11-10T17:40:34.226862+00:00",
+  "domains": [
+    {
+      "domain": "construction",
+      "checks": {
+        "replay_does_not_duplicate_results": true,
+        "revision_replaces_quantity": true,
+        "late_receipt_updates_historical_result": true,
+        "failed_stage_keeps_complete_consumer_generation": true,
+        "recovery_publishes_complete_generation": true
+      },
+      "timeline": {
+        "initial": {
+          "decision": "Invoice exceptions: 0",
+          "outcome": "SUCCESS",
+          "published": true,
+          "consumer_generation": "20261110T173638288735Z-ef176fb2",
+          "staged_generation": "20261110T173638288735Z-ef176fb2",
+          "measure": "accepted metric tonnes",
+          "value": "10.000000",
+          "replay_duplicates_suppressed": 0,
+          "sources": {
+            "invoices": "STALE_SOURCE_UPDATE_OVER_72H",
+            "invoice_lines": "STALE_SOURCE_UPDATE_OVER_72H",
+            "invoice_delivery_allocations": "STALE_SOURCE_UPDATE_OVER_72H",
+            "purchase_order_lines": "STALE_SOURCE_UPDATE_OVER_72H",
+            "scale_tickets": "STALE_SOURCE_UPDATE_OVER_72H",
+            "site_receipts": "STALE_SOURCE_UPDATE_OVER_72H"
+          }
+        },
+        "replay": {
+          "decision": "Invoice exceptions: 0",
+          "outcome": "SUCCESS",
+          "published": true,
+          "consumer_generation": "20261110T173724440376Z-67922b38",
+          "staged_generation": "20261110T173724440376Z-67922b38",
+          "measure": "accepted metric tonnes",
+          "value": "10.000000",
+          "replay_duplicates_suppressed": 6,
+          "sources": {
+            "invoices": "STALE_SOURCE_UPDATE_OVER_72H",
+            "invoice_lines": "STALE_SOURCE_UPDATE_OVER_72H",
+            "invoice_delivery_allocations": "STALE_SOURCE_UPDATE_OVER_72H",
+            "purchase_order_lines": "STALE_SOURCE_UPDATE_OVER_72H",
+            "scale_tickets": "STALE_SOURCE_UPDATE_OVER_72H",
+            "site_receipts": "STALE_SOURCE_UPDATE_OVER_72H"
+          }
+        },
+        "interrupted_revision": {
+          "decision": "Staged output withheld; previous complete generation remains current",
+          "outcome": "FAILED_INJECTED",
+          "published": false,
+          "consumer_generation": "20261110T173724440376Z-67922b38",
+          "staged_generation": "20261110T173809888169Z-aab00ab0",
+          "measure": "consumer accepted metric tonnes",
+          "value": "10.000000",
+          "replay_duplicates_suppressed": 6,
+          "sources": {
+            "purchase_order_lines": "STALE_SOURCE_UPDATE_OVER_72H",
+            "scale_tickets": "STALE_SOURCE_UPDATE_OVER_72H",
+            "site_receipts": "STALE_SOURCE_UPDATE_OVER_72H",
+            "invoices": "STALE_SOURCE_UPDATE_OVER_72H",
+            "invoice_lines": "STALE_SOURCE_UPDATE_OVER_72H",
+            "invoice_delivery_allocations": "STALE_SOURCE_UPDATE_OVER_72H"
+          }
+        },
+        "recovered_revision": {
+          "decision": "Invoice exceptions: 1",
+          "outcome": "SUCCESS",
+          "published": true,
+          "consumer_generation": "20261110T173848025886Z-73e059fe",
+          "staged_generation": "20261110T173848025886Z-73e059fe",
+          "measure": "accepted metric tonnes",
+          "value": "9.000000",
+          "replay_duplicates_suppressed": 7,
+          "sources": {
+            "invoices": "STALE_SOURCE_UPDATE_OVER_72H",
+            "invoice_lines": "STALE_SOURCE_UPDATE_OVER_72H",
+            "invoice_delivery_allocations": "STALE_SOURCE_UPDATE_OVER_72H",
+            "purchase_order_lines": "STALE_SOURCE_UPDATE_OVER_72H",
+            "scale_tickets": "STALE_SOURCE_UPDATE_OVER_72H",
+            "site_receipts": "STALE_SOURCE_UPDATE_OVER_72H"
+          }
+        },
+        "late_receipt_pending": {
+          "decision": "Invoice exceptions: 1",
+          "outcome": "SUCCESS",
+          "published": true,
+          "consumer_generation": "20261110T173917696878Z-ba9e8a4c",
+          "staged_generation": "20261110T173917696878Z-ba9e8a4c",
+          "measure": "accepted metric tonnes",
+          "value": "0",
+          "replay_duplicates_suppressed": 0,
+          "sources": {
+            "invoices": "STALE_SOURCE_UPDATE_OVER_72H",
+            "invoice_lines": "STALE_SOURCE_UPDATE_OVER_72H",
+            "invoice_delivery_allocations": "STALE_SOURCE_UPDATE_OVER_72H",
+            "purchase_order_lines": "STALE_SOURCE_UPDATE_OVER_72H",
+            "scale_tickets": "STALE_SOURCE_UPDATE_OVER_72H",
+            "site_receipts": "MISSING_EXPECTED_FILE"
+          }
+        },
+        "late_receipt_arrived": {
+          "decision": "Invoice exceptions: 0",
+          "outcome": "SUCCESS",
+          "published": true,
+          "consumer_generation": "20261110T174000128519Z-34363445",
+          "staged_generation": "20261110T174000128519Z-34363445",
+          "measure": "accepted metric tonnes",
+          "value": "10.000000",
+          "replay_duplicates_suppressed": 5,
+          "sources": {
+            "invoices": "STALE_SOURCE_UPDATE_OVER_72H",
+            "invoice_lines": "STALE_SOURCE_UPDATE_OVER_72H",
+            "invoice_delivery_allocations": "STALE_SOURCE_UPDATE_OVER_72H",
+            "purchase_order_lines": "STALE_SOURCE_UPDATE_OVER_72H",
+            "scale_tickets": "STALE_SOURCE_UPDATE_OVER_72H",
+            "site_receipts": "STALE_SOURCE_UPDATE_OVER_72H"
+          }
+        }
+      }
+    },
+    {
+      "domain": "saas-usage-billing",
+      "checks": {
+        "replay_does_not_duplicate_results": true,
+        "revision_replaces_usage": true,
+        "late_invoice_resolves_missing_feed": true,
+        "failed_stage_keeps_complete_consumer_generation": true,
+        "recovery_publishes_complete_generation": true
+      },
+      "timeline": {
+        "initial": {
+          "decision": "Billed units: 190; exception: BILLED_USAGE_MISMATCH",
+          "outcome": "SUCCESS",
+          "published": true,
+          "consumer_generation": "20261110T174011244182Z-d67e62e3",
+          "staged_generation": "20261110T174011244182Z-d67e62e3",
+          "measure": "observed units",
+          "value": "200",
+          "replay_duplicates_suppressed": 0,
+          "sources": {
+            "usage": "STALE_SOURCE_UPDATE_OVER_72H",
+            "invoices": "RECEIVED"
+          }
+        },
+        "replay": {
+          "decision": "Billed units: 190; exception: BILLED_USAGE_MISMATCH",
+          "outcome": "SUCCESS",
+          "published": true,
+          "consumer_generation": "20261110T174016331546Z-36be8d1f",
+          "staged_generation": "20261110T174016331546Z-36be8d1f",
+          "measure": "observed units",
+          "value": "200",
+          "replay_duplicates_suppressed": 5,
+          "sources": {
+            "usage": "STALE_SOURCE_UPDATE_OVER_72H",
+            "invoices": "RECEIVED"
+          }
+        },
+        "interrupted_revision": {
+          "decision": "Staged output withheld; previous complete generation remains current",
+          "outcome": "FAILED_INJECTED",
+          "published": false,
+          "consumer_generation": "20261110T174016331546Z-36be8d1f",
+          "staged_generation": "20261110T174021393706Z-b4e549d2",
+          "measure": "consumer observed units",
+          "value": "200",
+          "replay_duplicates_suppressed": 5,
+          "sources": {
+            "usage": "RECEIVED",
+            "invoices": "RECEIVED"
+          }
+        },
+        "recovered_revision": {
+          "decision": "Billed units: 190; exception: none",
+          "outcome": "SUCCESS",
+          "published": true,
+          "consumer_generation": "20261110T174026632934Z-5045e0df",
+          "staged_generation": "20261110T174026632934Z-5045e0df",
+          "measure": "observed units",
+          "value": "190",
+          "replay_duplicates_suppressed": 6,
+          "sources": {
+            "usage": "RECEIVED",
+            "invoices": "RECEIVED"
+          }
+        },
+        "late_invoice_pending": {
+          "decision": "Billed units: None; exception: MISSING_INVOICE",
+          "outcome": "SUCCESS",
+          "published": true,
+          "consumer_generation": "20261110T174029125657Z-fd74e787",
+          "staged_generation": "20261110T174029125657Z-fd74e787",
+          "measure": "observed units",
+          "value": "200",
+          "replay_duplicates_suppressed": 0,
+          "sources": {
+            "usage": "STALE_SOURCE_UPDATE_OVER_72H",
+            "invoices": "MISSING_EXPECTED_FILE"
+          }
+        },
+        "late_invoice_arrived": {
+          "decision": "Billed units: 190; exception: BILLED_USAGE_MISMATCH",
+          "outcome": "SUCCESS",
+          "published": true,
+          "consumer_generation": "20261110T174032827021Z-f80dbf3d",
+          "staged_generation": "20261110T174032827021Z-f80dbf3d",
+          "measure": "observed units",
+          "value": "200",
+          "replay_duplicates_suppressed": 2,
+          "sources": {
+            "usage": "STALE_SOURCE_UPDATE_OVER_72H",
+            "invoices": "RECEIVED"
+          }
+        }
+      }
+    }
+  ]
+}

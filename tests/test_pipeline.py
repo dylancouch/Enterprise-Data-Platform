@@ -45,7 +45,13 @@ def test_clean_replay_and_interrupted_publication(tmp_path: Path, spark: SparkSe
     failed = run_pipeline(root, spark, fail_after_product="daily_delivered_quantities")
     assert failed["published"] is False
     assert json.loads(pointer_path.read_text())["generation"] == duplicate_file["generation"]
-    assert prior_generation != failed["generation"]
+    assert prior_generation != failed["staged_generation"]
+    assert failed["last_good_generation"] == duplicate_file["generation"]
+    assert {row["source_feed"] for row in failed["source_freshness"]} == {
+        "purchase_order_lines", "scale_tickets", "site_receipts", "invoices",
+        "invoice_lines", "invoice_delivery_allocations",
+    }
+    assert json.loads((root / "evidence" / "runs" / f"{failed['run_id']}.json").read_text())["published"] is False
 
     recovered = run_pipeline(root, spark)
     assert recovered["published"] is True

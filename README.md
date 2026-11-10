@@ -25,6 +25,8 @@ make saas-demo
 
 The installed CLI exposes the same examples as `.venv/bin/edp demo --root data/demo` and `.venv/bin/edp saas-demo --root data/saas-demo`. The `generate`, `run`, and `report` subcommands currently operate on the construction example.
 
+Run `make verify-reliability` for a credential-free local Spark/Delta check of replay, revisions, late arrivals, interrupted publication, and recovery in both examples. It writes [synthetic reliability evidence](evidence/local-reliability.json) and a [synthetic operational report](reports/synthetic-reliability.html).
+
 `make demo` runs the construction reference example. It creates files under `data/demo/landing/`; the independent oracle and scenario manifest are stored separately under `data/demo/expected/` and are never pipeline inputs. Spark writes raw, validated and reporting Delta data under `data/demo/tables/`. Consumers resolve all reporting products through `tables/gold/current_generation.json`. The latest sanitized run is committed at [evidence/enterprise-construction-demo.json](evidence/enterprise-construction-demo.json).
 
 Other commands:
@@ -40,7 +42,7 @@ make test
 make lint
 ```
 
-See [docs/STATUS.md](docs/STATUS.md) for exact environment setup, executed checks, outcomes and limitations.
+See [the roadmap](docs/ROADMAP.md) and [project status](docs/STATUS.md) for planned work, executed checks, outcomes, and limitations.
 
 ## Reports and recovery
 

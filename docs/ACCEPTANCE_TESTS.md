@@ -39,3 +39,7 @@ Milestone 1 must execute clean flow, duplicate replay, ticket correction, late/m
 - Run identifiers, source provenance, quarantine reasons, publication generation.
 - Local versus Databricks checks explicitly separated; unexecuted tests labeled unverified.
 - Performance measurements are accepted only with correctness invariants passing on the same data.
+
+## Local reliability gate
+
+Run `make verify-reliability` after the local environment is installed. The command exercises both synthetic domains through unchanged replay, a higher revision, a late expected feed, interrupted product publication, and recovery. It reads the consumer pointer and the Delta products it names, then writes `evidence/local-reliability.json` and `reports/synthetic-reliability.html`. Any failed assertion exits before those artifacts are replaced. The focused regression tests for the construction failed-run record and SaaS late invoice are in `tests/test_pipeline.py` and `tests/test_saas.py`.
