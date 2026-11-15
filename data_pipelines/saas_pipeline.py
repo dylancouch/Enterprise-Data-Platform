@@ -114,7 +114,7 @@ def run(root: Path, spark: SparkSession, fail_before_publish: bool = False) -> d
     published = not fail_before_publish
     if published:
         publish_generation(pointer_path, generation, run_id)
-    report = {"synthetic": True, "project": PROJECT_NAME, "description": PROJECT_DESCRIPTION, "domain": "saas-usage-billing", "scenario": "saas-usage-to-invoice", "run_id": run_id, "status": "SUCCESS" if published else "FAILED_INJECTED", "published": published, "generation": generation if published else None, "staged_generation": generation, "last_good_generation": last_good, "publication_pointer": str(pointer_path), "duplicate_business_events_suppressed": duplicates_suppressed, "source_freshness": freshness, "reconciliation": result}
+    report = {"synthetic": True, "project": PROJECT_NAME, "description": PROJECT_DESCRIPTION, "domain": "saas-usage-billing", "scenario": "saas-usage-to-invoice", "run_id": run_id, "status": "SUCCESS" if published else "FAILED_INJECTED", "published": published, "generation": generation if published else None, "staged_generation": generation, "last_good_generation": last_good, "publication_pointer": pointer_path.relative_to(root).as_posix(), "duplicate_business_events_suppressed": duplicates_suppressed, "source_freshness": freshness, "reconciliation": result}
     _write_evidence(root, report)
     return report
 

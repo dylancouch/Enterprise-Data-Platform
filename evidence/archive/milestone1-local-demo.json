@@ -29,5 +29,5 @@
     }
   ],
   "invoice_exceptions": [],
-  "publication_pointer": "/var/home/dylan/src/construction-data-platform/data/demo/tables/gold/current_generation.json"
+  "publication_pointer": "data/demo/tables/gold/current_generation.json"
 }

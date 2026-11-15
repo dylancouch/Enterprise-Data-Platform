@@ -14,14 +14,14 @@ SCHEMA_VERSION = "1.0"
 SEED = 1729
 
 
-def _write_csv(path: Path, rows: list[dict[str, str]]) -> dict[str, object]:
+def _write_csv(root: Path, path: Path, rows: list[dict[str, str]]) -> dict[str, object]:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as stream:
         writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
     payload = path.read_bytes()
-    return {"path": str(path), "rows": len(rows), "sha256": hashlib.sha256(payload).hexdigest(), "bytes": len(payload)}
+    return {"path": path.relative_to(root).as_posix(), "rows": len(rows), "sha256": hashlib.sha256(payload).hexdigest(), "bytes": len(payload)}
 
 
 def _envelope(record_id: str, revision: str, event_time: str, **fields: str) -> dict[str, str]:
@@ -64,19 +64,19 @@ def generate(root: Path, scenario: str = "golden", seed: int = SEED) -> dict[str
         if (scenario == "late-receipt" and name == "site_receipts") or (
             scenario == "late-po" and name == "purchase_order_lines"
         ):
-            deferred_files.append(_write_csv(deferred / f"{name}_late_arrival.csv", rows))
+            deferred_files.append(_write_csv(root, deferred / f"{name}_late_arrival.csv", rows))
         else:
-            files.append(_write_csv(landing / f"{name}_batch_001.csv", rows))
+            files.append(_write_csv(root, landing / f"{name}_batch_001.csv", rows))
 
     if scenario in {"ticket-correction", "late-reference"}:
         revision = dict(tickets[0], source_revision="2", source_record_id="SCALE-A:T-9001", source_updated_at="2026-10-21T08:00:00Z", gross_weight="11.000", tare_weight="2.000", weighed_at="2026-10-20T14:30:00Z")
-        _write_csv(landing / "scale_tickets_batch_002.csv", [revision])
+        _write_csv(root, landing / "scale_tickets_batch_002.csv", [revision])
     if scenario == "duplicate-replay":
         # New filename, identical business envelope/payload to exercise retry suppression.
-        _write_csv(landing / "scale_tickets_retry_renamed.csv", tickets)
+        _write_csv(root, landing / "scale_tickets_retry_renamed.csv", tickets)
     if scenario == "invalid-unit":
         bad = dict(tickets[0], source_record_id="SCALE-A:T-BAD", ticket_id="T-BAD", delivery_id="D-BAD", weight_unit="ton")
-        _write_csv(landing / "scale_tickets_invalid.csv", [bad])
+        _write_csv(root, landing / "scale_tickets_invalid.csv", [bad])
 
     now = datetime.now(UTC).isoformat()
     arrivals = {"initial_feeds": "available at run start", "correction": "included only in correction scenarios"}

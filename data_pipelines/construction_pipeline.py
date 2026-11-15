@@ -576,7 +576,7 @@ def run_pipeline(root: Path, spark: SparkSession | None = None, fail_after_produ
                 "duplicate_business_envelopes_suppressed": duplicates,
                 "source_freshness": [row.asDict(recursive=True) for row in source_freshness.collect()],
                 "products_written": product_counts,
-                "publication_pointer": str(pointer_path),
+                "publication_pointer": pointer_path.relative_to(root).as_posix(),
             }
             evidence_dir = root / "evidence" / "runs"
             evidence_dir.mkdir(parents=True, exist_ok=True)
@@ -617,7 +617,7 @@ def run_pipeline(root: Path, spark: SparkSession | None = None, fail_after_produ
         "invoice_exceptions": product_rows("invoice_exceptions"),
         "invoice_net_amounts": product_rows("invoice_net_amounts"),
         "source_freshness": product_rows("source_freshness"),
-        "publication_pointer": str(pointer_path),
+        "publication_pointer": pointer_path.relative_to(root).as_posix(),
     }
     # Keep a small, explicit comparison to the prior successful run for operator context.
     prior_reports = sorted(

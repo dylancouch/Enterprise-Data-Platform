@@ -101,6 +101,6 @@
       "synthetic": true
     }
   ],
-  "publication_pointer": "/var/home/dylan/src/construction-data-platform/data/demo/tables/gold/current_generation.json",
+  "publication_pointer": "data/demo/tables/gold/current_generation.json",
   "report_generated_at_utc": "2026-10-23T02:04:07.049115+00:00"
 }
