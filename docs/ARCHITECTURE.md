@@ -13,7 +13,7 @@ flowchart LR
     G --> Q[Consumer report readers]
 ```
 
-In the construction example, bronze stores what arrived, including source file hashes and ingestion batches. Silver holds revision history, current validated records, delivery status, reconciliation, and quarantine. The SaaS example stores raw usage and invoice revisions in bronze and derives current records during each run. Both examples write gold products beneath a unique generation directory. Readers resolve products through `current_generation.json` and must not read staged generation directories directly. The local pointer is atomically replaced only after reporting writes succeed. Databricks object-store behavior remains unverified.
+In the construction example, bronze stores what arrived, including source file hashes and ingestion batches. Silver holds revision history, current validated records, delivery status, reconciliation, and quarantine. The SaaS example stores raw usage and invoice revisions in bronze and derives current records during each run. Both examples write gold products beneath a unique generation directory. Readers resolve products through `current_generation.json` and must not read staged generation directories directly. The pointer changed only after reporting writes succeeded in local runs and the bounded Databricks Unity Catalog volume runs. Other object-store behavior remains unverified.
 
 ## Consumer queries
 

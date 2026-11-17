@@ -1,0 +1,93 @@
+{
+  "synthetic": true,
+  "verification": "Databricks Free Edition, development bundle target",
+  "verified_at_utc": "2026-11-17",
+  "bundle_validation": "passed",
+  "deployment": {
+    "catalog": "workspace",
+    "schema": "development-mode-prefixed enterprise_data_dev",
+    "volume": "enterprise_data",
+    "job": "construction_demo",
+    "serverless_environment_version": "6"
+  },
+  "runs": [
+    {
+      "case": "golden",
+      "job_run_id": "535100157115658",
+      "pipeline_run_id": "d7ac2ec7-8a97-4522-bb73-6dbfcff0c525",
+      "outcome": "SUCCESS",
+      "generation": "20261117T170002300852Z-d7ac2ec7",
+      "accepted_metric_tonnes": "10.000000",
+      "net_invoice_usd": "125.00",
+      "invoice_exceptions": 0
+    },
+    {
+      "case": "identical replay",
+      "job_run_id": "1024429246988811",
+      "pipeline_run_id": "778f8da5-07be-46f8-bb58-73dcfa5f94af",
+      "outcome": "SUCCESS",
+      "generation": "20261117T170301894863Z-778f8da5",
+      "duplicate_business_envelopes_suppressed": 6,
+      "accepted_metric_tonnes": "10.000000",
+      "invoice_exceptions": 0
+    },
+    {
+      "case": "ticket revision",
+      "job_run_id": "29212892932987",
+      "pipeline_run_id": "83491793-f29d-4b61-a40b-338431f73275",
+      "outcome": "SUCCESS",
+      "generation": "20261117T170530733235Z-83491793",
+      "previous_generation": "20261117T170301894863Z-778f8da5",
+      "accepted_metric_tonnes": "9.000000",
+      "invoice_exceptions": 1,
+      "exception_reason": "QUANTITY_MISMATCH"
+    },
+    {
+      "case": "missing receipt",
+      "job_run_id": "401430053949949",
+      "pipeline_run_id": "86c51eb3-c083-4bb0-be8e-a40e3e22404a",
+      "outcome": "SUCCESS",
+      "generation": "20261117T170834996977Z-86c51eb3",
+      "accepted_metric_tonnes": "0",
+      "receipt_freshness": "MISSING_EXPECTED_FILE",
+      "invoice_exceptions": 1,
+      "exception_reason": "PENDING_SUPPORTING_DELIVERY"
+    },
+    {
+      "case": "late receipt arrival",
+      "job_run_id": "1074403796951473",
+      "pipeline_run_id": "8741197e-fc42-4275-8f64-5c71863f600d",
+      "outcome": "SUCCESS",
+      "generation": "20261117T171105669306Z-8741197e",
+      "previous_generation": "20261117T170834996977Z-86c51eb3",
+      "accepted_metric_tonnes": "10.000000",
+      "invoice_exceptions": 0
+    },
+    {
+      "case": "interrupted ticket correction",
+      "job_run_id": "1064031435605746",
+      "outcome": "FAILED_INJECTED",
+      "task_attempts": 2,
+      "published": false,
+      "last_good_generation": "20261117T171105669306Z-8741197e",
+      "consumer_pointer_after_failure": "20261117T171105669306Z-8741197e",
+      "products_staged_per_attempt": ["daily_delivered_quantities"]
+    },
+    {
+      "case": "recovery after interruption",
+      "job_run_id": "904351257829370",
+      "pipeline_run_id": "fa070db7-9236-4ec9-9ba8-c8e81cc34f5f",
+      "outcome": "SUCCESS",
+      "generation": "20261117T171737355757Z-fa070db7",
+      "previous_generation": "20261117T171105669306Z-8741197e",
+      "accepted_metric_tonnes": "9.000000",
+      "invoice_exceptions": 1,
+      "exception_reason": "QUANTITY_MISMATCH"
+    }
+  ],
+  "limits": [
+    "Construction example only; SaaS has not run in Databricks.",
+    "This verifies the project's Unity Catalog volume pointer behavior in the tested workspace, not arbitrary object stores.",
+    "Native lineage, permission boundaries, and production-scale performance were not tested."
+  ]
+}

@@ -39,8 +39,10 @@ resources:
           spark_python_task:
             python_file: ./data_pipelines/databricks_entry.py
             parameters:
+              - --code-root
+              - ${workspace.file_path}
               - --root
-              - /Volumes/${var.catalog}/${var.schema}/enterprise_data
+              - ${resources.volumes.enterprise_data_volume.volume_path}
               - --scenario
               - ${var.demo_scenario}
           environment_key: default
@@ -55,6 +57,7 @@ targets:
     default: true
     mode: development
     variables:
+      catalog: workspace
       schema: enterprise_data_dev
       demo_scenario: golden
   prod:

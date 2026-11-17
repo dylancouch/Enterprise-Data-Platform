@@ -1,6 +1,6 @@
 # Construction example recovery runbook
 
-This example uses synthetic local fixtures. Local commands validate the packaged Spark/Delta implementation; they do not exercise Databricks or an upstream source connection. The SaaS example's interruption and recovery sequence is documented in `docs/SAAS_CONTRACT.md`.
+This example uses synthetic fixtures. Local commands validate the packaged Spark/Delta implementation; the bounded Databricks construction run is recorded separately in [hosted evidence](../evidence/databricks-construction-acceptance.json). Neither execution connects to a live upstream source. The SaaS example's interruption and recovery sequence is documented in `docs/SAAS_CONTRACT.md`.
 
 ## Upstream outage or stale source
 
@@ -24,7 +24,7 @@ Read `tables/silver/quarantine` and record the reason code plus source file and 
 
 ## Partial publication failure
 
-If a run fails after one product is staged, readers continue to resolve the last-good generation through `current_generation.json`. Inspect the failed run report and staged generation, fix the cause, and rerun from the same root. The next successful run recomputes from immutable raw inputs and atomically replaces the local pointer. Never direct consumers to a staged generation. Databricks object-store pointer behavior has not been verified.
+If a run fails after one product is staged, readers continue to resolve the last-good generation through `current_generation.json`. Inspect the failed run report and staged generation, fix the cause, and rerun from the same root. The next successful run recomputes from immutable raw inputs and replaces the pointer. Never direct consumers to a staged generation. This sequence passed locally and in the tested Databricks Unity Catalog volume; other object-store behavior remains unverified.
 
 ## Bad load or ticket cancellation
 

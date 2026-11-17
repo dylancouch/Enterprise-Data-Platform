@@ -2,7 +2,7 @@
 
 A Spark and Delta data platform for integrating operational sources, publishing trustworthy analytics, and monitoring pipeline health across industries.
 
-This portfolio project uses **synthetic operational data only**. It demonstrates shared source ingestion, revision and replay handling, freshness assessment, and complete report publication across two independent examples: construction purchasing/delivery/invoices and SaaS usage/billing. Both use local PySpark and Delta. The versioned Databricks bundle targets the construction example; workspace validation and execution are pending because no workspace authentication is configured in this environment. The project is not connected to a real contractor or software provider.
+This portfolio project uses **synthetic operational data only**. It demonstrates shared source ingestion, revision and replay handling, freshness assessment, and complete report publication across two independent examples: construction purchasing/delivery/invoices and SaaS usage/billing. Both use local PySpark and Delta. The versioned Databricks bundle has also been validated, deployed, and run for bounded construction acceptance cases in a Free Edition workspace; see [hosted evidence](evidence/databricks-construction-acceptance.json). The project is not connected to a real contractor or software provider.
 
 The shared Spark/Delta mechanics are in `data_pipelines/spark_delta.py`. `data_pipelines/construction_pipeline.py` and `data_pipelines/saas_pipeline.py` contain the example-specific logic; `data_pipelines/construction_generator.py` creates synthetic construction inputs. Run them through `data_pipelines/cli.py`. See [the shared contract](docs/PLATFORM_CONTRACT.md), [construction contracts](docs/SOURCE_CONTRACTS.md), [SaaS contract](docs/SAAS_CONTRACT.md), and [the extension guide](docs/EXTENDING.md).
 
@@ -43,6 +43,20 @@ make lint
 ```
 
 See [the roadmap](docs/ROADMAP.md) and [project status](docs/STATUS.md) for planned work, executed checks, outcomes, and limitations.
+
+## Databricks construction demo
+
+The `dev` bundle target uses the isolated `workspace` catalog available in the tested Free Edition workspace. With the Databricks CLI installed and the project-local profile configured, run:
+
+```bash
+export DATABRICKS_CONFIG_FILE="$PWD/.home/.databrickscfg"
+databricks auth login --host <workspace-url> --profile enterprise-data-dev
+databricks bundle validate -t dev
+databricks bundle deploy -t dev
+databricks bundle run construction_demo -t dev
+```
+
+The job writes synthetic files and Delta products to its managed Unity Catalog volume. Development mode prefixes the schema name; the job resolves the deployed volume path from the bundle resource. The [hosted evidence](evidence/databricks-construction-acceptance.json) covers golden output, replay, ticket revision, late receipt, interrupted publication, and recovery. Other workspace behavior remains subject to the limits in [project status](docs/STATUS.md).
 
 ## Reports and recovery
 
