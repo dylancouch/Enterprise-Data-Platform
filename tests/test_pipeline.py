@@ -77,6 +77,54 @@ def test_ticket_correction_replaces_quantity(tmp_path: Path, spark: SparkSession
     assert correction.exists()
 
 
+def test_date_backfill_repair_preserves_other_daily_date(tmp_path: Path, spark: SparkSession) -> None:
+    root = tmp_path / "date-backfill"
+    generate(root, "golden")
+    ticket_file = root / "landing/scale_tickets_batch_001.csv"
+    receipt_file = root / "landing/site_receipts_batch_001.csv"
+    with ticket_file.open(newline="", encoding="utf-8") as stream:
+        ticket = next(csv.DictReader(stream))
+    with receipt_file.open(newline="", encoding="utf-8") as stream:
+        receipt = next(csv.DictReader(stream))
+
+    def add_rows(path: Path, rows: list[dict[str, str]]) -> None:
+        with path.open("w", newline="", encoding="utf-8") as stream:
+            writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+            writer.writeheader()
+            writer.writerows(rows)
+
+    add_rows(root / "landing/scale_tickets_second.csv", [dict(ticket, source_record_id="SCALE-A:T-9002",
+        ticket_id="T-9002", delivery_id="D-9002", source_updated_at="2026-10-21T14:30:00Z",
+        event_time="2026-10-21T14:30:00Z", weighed_at="2026-10-21T14:30:00Z")])
+    add_rows(root / "landing/site_receipts_second.csv", [dict(receipt, source_record_id="RCPT-9002",
+        receipt_id="RCPT-9002", delivery_id="D-9002", source_updated_at="2026-10-21T14:30:00Z",
+        event_time="2026-10-21T14:30:00Z", received_at="2026-10-21T14:30:00Z")])
+    baseline = run_pipeline(root, spark)
+    assert len(baseline["daily_delivered"]) == 2
+    other = next(row for row in baseline["daily_delivered"] if str(row["business_date"]) == "2026-10-21")
+    add_rows(root / "landing/scale_tickets_correction.csv", [dict(ticket, source_revision="2",
+        source_updated_at="2026-10-22T08:00:00Z", gross_weight="11.000")])
+    pointer = root / "tables/gold/current_generation.json"
+    failed = run_pipeline(root, spark, fail_after_product="daily_delivered_quantities",
+                          start_date="2026-10-20", end_date="2026-10-20")
+    assert json.loads(pointer.read_text())["generation"] == baseline["generation"]
+    repaired = run_pipeline(root, spark, start_date="2026-10-20", end_date="2026-10-20",
+                            repair_run_id=failed["run_id"])
+    assert next(row for row in repaired["daily_delivered"] if str(row["business_date"]) == "2026-10-21") == other
+    assert str(next(row for row in repaired["daily_delivered"] if str(row["business_date"]) == "2026-10-20")["accepted_net_quantity"]) == "9.000000"
+    replay = run_pipeline(root, spark, start_date="2026-10-20", end_date="2026-10-20")
+    assert sorted(replay["daily_delivered"], key=lambda row: str(row["business_date"])) == sorted(
+        repaired["daily_delivered"], key=lambda row: str(row["business_date"]))
+    clean = tmp_path / "date-clean-rebuild"
+    shutil.copytree(root / "landing", clean / "landing")
+    rebuilt = run_pipeline(clean, spark)
+    assert sorted(rebuilt["daily_delivered"], key=lambda row: str(row["business_date"])) == sorted(
+        repaired["daily_delivered"], key=lambda row: str(row["business_date"]))
+    ledger = [json.loads(line) for line in (root / "evidence/run_ledger.jsonl").read_text().splitlines()]
+    assert [row["status"] for row in ledger] == ["SUCCESS", "FAILED_INJECTED", "SUCCESS", "SUCCESS"]
+    assert ledger[2]["repairs_run_id"] == failed["run_id"]
+
+
 def test_ticket_cancellation_removes_delivery_and_flags_invoice(tmp_path: Path, spark: SparkSession) -> None:
     root = tmp_path / "cancelled-ticket"
     generate(root, "golden")

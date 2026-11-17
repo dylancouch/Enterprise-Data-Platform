@@ -9,7 +9,7 @@ The shared Spark/Delta mechanics are in `data_pipelines/spark_delta.py`. `data_p
 | Synthetic example | Sources and decision product | Operational behavior shown |
 | --- | --- | --- |
 | Construction purchasing and delivery | Purchase orders, tickets, receipts, invoices, and allocations → accepted quantities and invoice exceptions | Revisions, late links, quarantine, freshness, replay, and complete publication |
-| SaaS usage and billing | Metered usage and invoices → billed-versus-observed units | Stale input, renamed replay, correction, conflict refusal, and recovery after an interrupted publication |
+| SaaS usage and billing | Metered usage and invoices → billed-versus-observed units | Stale input, malformed-row quarantine, multiple invoices, renamed replay, correction, conflict refusal, and recovery after an interrupted publication |
 
 ## Run the local examples
 
@@ -23,7 +23,7 @@ make demo
 make saas-demo
 ```
 
-The installed CLI exposes the same examples as `.venv/bin/edp demo --root data/demo` and `.venv/bin/edp saas-demo --root data/saas-demo`. The `generate`, `run`, and `report` subcommands currently operate on the construction example.
+The installed CLI exposes the same examples as `.venv/bin/edp demo --root data/demo` and `.venv/bin/edp saas-demo --root data/saas-demo`. The `generate`, `run`, and `report` subcommands operate on construction; `saas-run` operates on SaaS.
 
 Run `make verify-reliability` for a credential-free local Spark/Delta check of replay, revisions, late arrivals, interrupted publication, and recovery in both examples. It writes [synthetic reliability evidence](evidence/local-reliability.json) and a [synthetic operational report](reports/synthetic-reliability.html).
 
@@ -65,6 +65,8 @@ The latest synthetic run report is available with `.venv/bin/python -m data_pipe
 ## SaaS usage and billing example
 
 Run `make saas-demo` to reconcile metered software usage against a customer invoice. It demonstrates a stale feed and invoice mismatch, a renamed-file replay with duplicate suppression, a corrected event revision, and an interrupted publication that leaves the last-good generation active. The final correction restores agreement. Each command writes to a new timestamped folder beneath `data/saas-demo/`; its `evidence/walkthrough.json` records the steps and generations. A sanitized result is committed at [evidence/enterprise-saas-walkthrough.json](evidence/enterprise-saas-walkthrough.json). Data is fictional and outputs are not production scale.
+
+For an existing local root, `edp saas-run --root <root> --start-period 2026-10 --end-period 2026-10` rebuilds one or more billing periods while preserving unrelated periods. `edp run --root <root> --start-date 2026-10-20 --end-date 2026-10-20` rebuilds construction daily-delivery dates. Both require a baseline generation and write `evidence/run_ledger.jsonl`. A failed run can be linked to a repair with `--repair-run-id <id>` and the same range, or `edp repair-pending --domain saas --root <root>` can select the newest unresolved failure automatically (`--domain construction` for construction). Construction invoice and freshness products are recomputed globally during a daily-date backfill. See the [local acceptance evidence](evidence/local-saas-backfill-acceptance.json), [contracts](docs/PLATFORM_CONTRACT.md), and [runbook](docs/RUNBOOK.md) for details.
 
 See the [recovery runbook](docs/RUNBOOK.md), [governance limits](docs/GOVERNANCE.md), [architecture](docs/ARCHITECTURE.md), and [design decisions](docs/DESIGN_DECISIONS.md).
 

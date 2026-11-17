@@ -43,3 +43,18 @@ Milestone 1 must execute clean flow, duplicate replay, ticket correction, late/m
 ## Local reliability gate
 
 Run `make verify-reliability` after the local environment is installed. The command exercises both synthetic domains through unchanged replay, a higher revision, a late expected feed, interrupted product publication, and recovery. It reads the consumer pointer and the Delta products it names, then writes `evidence/local-reliability.json` and `reports/synthetic-reliability.html`. Any failed assertion exits before those artifacts are replaced. The focused regression tests for the construction failed-run record and SaaS late invoice are in `tests/test_pipeline.py` and `tests/test_saas.py`.
+
+## Local SaaS and backfill additions
+
+| Scenario | Expected behavior |
+| --- | --- |
+| SaaS malformed units beside valid rows | Invalid row appears in `input_quarantine`; valid rows still reconcile |
+| Several invoice IDs for one customer-period | Billed units aggregate once; observed usage is not multiplied; invoice count and IDs remain visible |
+| Higher invoice revision or identical replay | Latest invoice contributes once; identical evidence does not change business totals |
+| Equal invoice ID/revision with conflicting content | Run fails before publication; last-good pointer remains active and failure is in the ledger |
+| Mixed invoice prices or currencies | Explicit exception; ambiguous expected amount or currency remains null |
+| SaaS period backfill or construction daily-date backfill | Inclusive scoped rows rebuild; unrelated period/date rows remain unchanged |
+| Interrupted scoped backfill and repair | Pointer stays on baseline, failed run is recorded, repair links to it, and rerun converges |
+| Select newest pending local repair | Domain-specific ledger lookup skips failures already closed by a successful repair chain |
+
+The construction date range scopes only `daily_delivered_quantities`; invoice and freshness products are recomputed globally. These additions are local checks. Hosted SaaS and hosted backfill have not run.

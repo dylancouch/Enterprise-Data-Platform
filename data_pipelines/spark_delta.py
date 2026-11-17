@@ -79,3 +79,25 @@ def publish_generation(pointer_path: Path, generation: str, run_id: str) -> dict
     temp.write_text(json.dumps(pointer, indent=2) + "\n", encoding="utf-8")
     temp.replace(pointer_path)
     return pointer
+
+
+def pending_failed_run(root: Path, domain: str) -> dict[str, object]:
+    """Find the newest failed local run without a successful repair descendant."""
+    path = root / "evidence" / "run_ledger.jsonl"
+    if not path.exists():
+        raise ValueError("No local run ledger exists")
+    entries = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    by_id = {entry["run_id"]: entry for entry in entries}
+    resolved = set()
+    for entry in entries:
+        if entry["status"] != "SUCCESS":
+            continue
+        ancestor = entry.get("repairs_run_id")
+        while ancestor and ancestor not in resolved:
+            resolved.add(ancestor)
+            ancestor = by_id.get(ancestor, {}).get("repairs_run_id")
+    for entry in reversed(entries):
+        if (entry.get("domain") == domain and entry["status"] in {"FAILED", "FAILED_INJECTED"}
+                and entry["run_id"] not in resolved):
+            return entry
+    raise ValueError("No unrepaired failed run exists")

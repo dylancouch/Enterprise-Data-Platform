@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from pathlib import Path
 
@@ -75,15 +75,69 @@ def _union(frames):
     return result
 
 
-def run_pipeline(root: Path, spark: SparkSession | None = None, fail_after_product: str | None = None) -> dict[str, object]:
+def _construction_ledger(root: Path, entry: dict[str, object]) -> None:
+    path = root / "evidence" / "run_ledger.jsonl"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    entry = {"domain": "construction", **entry}
+    with path.open("a", encoding="utf-8") as stream:
+        stream.write(json.dumps(entry, default=str, sort_keys=True) + "\n")
+
+
+def run_pipeline(root: Path, spark: SparkSession | None = None, fail_after_product: str | None = None,
+                 start_date: str | None = None, end_date: str | None = None,
+                 repair_run_id: str | None = None) -> dict[str, object]:
+    root = root.resolve()
+    if (start_date is None) != (end_date is None):
+        raise ValueError("Both start_date and end_date are required for backfill")
+    if start_date is not None:
+        try:
+            if date.fromisoformat(start_date).isoformat() != start_date or date.fromisoformat(end_date).isoformat() != end_date or start_date > end_date:
+                raise ValueError("Invalid date range")
+        except ValueError as exc:
+            raise ValueError("Backfill dates must be valid YYYY-MM-DD values in ascending order") from exc
+    ledger_path = root / "evidence" / "run_ledger.jsonl"
+    if repair_run_id is not None:
+        entries = [json.loads(line) for line in ledger_path.read_text(encoding="utf-8").splitlines()] if ledger_path.exists() else []
+        failed = next((entry for entry in reversed(entries) if entry["run_id"] == repair_run_id), None)
+        if failed is None or failed["status"] not in {"FAILED", "FAILED_INJECTED"}:
+            raise ValueError("Repair requires a failed run ID")
+        if (start_date, end_date) != (failed.get("start_date"), failed.get("end_date")):
+            raise ValueError("Repair must use the failed run's date range")
+    pointer_path = root / "tables" / "gold" / "current_generation.json"
+    last_good = json.loads(pointer_path.read_text(encoding="utf-8"))["generation"] if pointer_path.exists() else None
+    if start_date is not None and last_good is None:
+        raise ValueError("Backfill requires a published baseline generation")
+    run_id = str(uuid.uuid4())
+    started = datetime.now(UTC).isoformat()
+    try:
+        report = _run_pipeline_impl(root, spark, fail_after_product, run_id, started, last_good,
+                                    start_date, end_date, repair_run_id)
+    except Exception as exc:
+        _construction_ledger(root, {"run_id": run_id, "status": "FAILED", "started_at_utc": started,
+                                    "finished_at_utc": datetime.now(UTC).isoformat(),
+                                    "last_good_generation": last_good, "start_date": start_date,
+                                    "end_date": end_date, "repairs_run_id": repair_run_id,
+                                    "error_type": type(exc).__name__, "error": str(exc)})
+        raise
+    _construction_ledger(root, {"run_id": run_id, "status": report["status"], "started_at_utc": started,
+                                "finished_at_utc": datetime.now(UTC).isoformat(),
+                                "last_good_generation": last_good, "generation": report["generation"],
+                                "staged_generation": report.get("staged_generation", report["generation"]),
+                                "start_date": start_date, "end_date": end_date,
+                                "repairs_run_id": repair_run_id})
+    return report
+
+
+def _run_pipeline_impl(root: Path, spark: SparkSession | None, fail_after_product: str | None,
+                       run_id: str, started: str, last_good: str | None,
+                       start_date: str | None, end_date: str | None,
+                       repair_run_id: str | None) -> dict[str, object]:
     root = root.resolve()
     landing, store = root / "landing", root / "tables"
     if not landing.exists():
         raise FileNotFoundError(f"Synthetic feed landing folder does not exist: {landing}")
     owns_spark = spark is None
     spark = spark or create_spark()
-    run_id = str(uuid.uuid4())
-    started = datetime.now(UTC).isoformat()
     ingest = _read_files(spark, landing, run_id)
     counts = {}
     duplicates = 0
@@ -270,6 +324,22 @@ def run_pipeline(root: Path, spark: SparkSession | None = None, fail_after_produ
     else:
         delivery = None
         products = []
+
+    if start_date is not None:
+        previous_daily_path = (store / "gold" / "generations" / last_good / "daily_delivered_quantities")
+        if not previous_daily_path.exists():
+            raise ValueError("Baseline has no daily-delivery product to backfill")
+        previous_daily = _read_delta(spark, previous_daily_path)
+        current_daily = next((product for name, product in products if name == "daily_delivered_quantities"),
+                             previous_daily.limit(0))
+        lower, upper = F.lit(date.fromisoformat(start_date)), F.lit(date.fromisoformat(end_date))
+        retained = previous_daily.filter((F.col("business_date") < lower) | (F.col("business_date") > upper))
+        rebuilt = current_daily.filter(F.col("business_date").between(lower, upper))
+        scoped_daily = retained.unionByName(rebuilt, allowMissingColumns=True)
+        products = [(name, scoped_daily if name == "daily_delivered_quantities" else product)
+                    for name, product in products]
+        if not any(name == "daily_delivered_quantities" for name, _ in products):
+            products.insert(0, ("daily_delivered_quantities", scoped_daily))
 
     freshness_schema = T.StructType([
         T.StructField("source_feed", T.StringType(), False),
@@ -570,6 +640,9 @@ def run_pipeline(root: Path, spark: SparkSession | None = None, fail_after_produ
                 "generation": None,
                 "staged_generation": generation,
                 "last_good_generation": last_good,
+                "start_date": start_date,
+                "end_date": end_date,
+                "repairs_run_id": repair_run_id,
                 "started_at_utc": started,
                 "finished_at_utc": datetime.now(UTC).isoformat(),
                 "source_rows_by_feed": counts,
@@ -605,6 +678,9 @@ def run_pipeline(root: Path, spark: SparkSession | None = None, fail_after_produ
         "run_id": run_id,
         "generation": generation,
         "status": "SUCCESS",
+        "start_date": start_date,
+        "end_date": end_date,
+        "repairs_run_id": repair_run_id,
         "published": True,
         "synthetic": True,
         "started_at_utc": started,

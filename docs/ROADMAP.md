@@ -27,23 +27,32 @@ The package layout changed after the previous full Spark suite run. The current 
 - [x] Record the bounded hosted results in [project status](STATUS.md) and [sanitized evidence](../evidence/databricks-construction-acceptance.json).
 - [x] Document remaining gaps for other object stores, lineage, permissions, and scale; do not claim unverified behavior.
 
-## Milestone 4 — SaaS input and invoice rules [needs design]
+## Milestone 4 — SaaS input and invoice rules [complete locally]
 
-Agree on behavior before extending the example, then implement and verify it.
+The chosen local policy quarantines malformed records while valid rows continue. Current invoices aggregate once per customer-period; conflicting latest revisions block publication, and ambiguous prices or currencies get explicit exceptions.
 
-- [ ] Define malformed-input handling, including validation, quarantine, and whether valid rows continue.
-- [ ] Define behavior for multiple invoices for one customer and billing period, including revisions and duplicate or conflicting records.
-- [ ] Add the agreed rules to the [SaaS contract](SAAS_CONTRACT.md) and acceptance scenarios.
-- [ ] Implement the rules and add tests for the agreed cases.
-- [ ] Record results and limitations in [project status](STATUS.md).
+- [x] Define malformed-input handling, including validation, quarantine, and whether valid rows continue.
+- [x] Define behavior for multiple invoices for one customer and billing period, including revisions and duplicate or conflicting records.
+- [x] Add the agreed rules to the [SaaS contract](SAAS_CONTRACT.md) and acceptance scenarios.
+- [x] Implement the rules and add tests for the agreed cases.
+- [x] Record results and limitations in [project status](STATUS.md).
 
-## Milestone 5 — Backfill and automated repair [needs design]
+## Milestone 5 — Backfill and automated repair [complete for bounded local cases]
 
-- [ ] Define date-range backfill behavior, including repeat runs, historical generations, and isolation from unrelated dates.
-- [ ] Define repair and run-ledger semantics, including how interrupted, failed, and replayed runs are represented and recovered.
-- [ ] Add the agreed behavior to the platform contract, runbook, and acceptance scenarios.
-- [ ] Implement backfill and repair/run-ledger support.
-- [ ] Verify clean rebuilds, reruns, failure recovery, and preservation of unrelated history; record evidence in [project status](STATUS.md).
+- [x] Define date-range backfill behavior, including repeat runs, historical generations, and isolation from unrelated dates.
+- [x] Define repair and run-ledger semantics, including how interrupted, failed, and replayed runs are represented and recovered.
+- [x] Add the agreed behavior to the platform contract, runbook, and acceptance scenarios.
+- [x] Implement local backfill, run ledger, and automatic selection of the newest unresolved failed run for SaaS periods and construction daily-delivery dates.
+- [x] Verify clean rebuilds, reruns, failure recovery, and preservation of unrelated history; record evidence in [project status](STATUS.md) and [local acceptance evidence](../evidence/local-saas-backfill-acceptance.json).
+
+The local repair command can use a failed run ID or automatically select the newest unresolved failure and its range. Invocation remains operator initiated; background scheduling and concurrent writer coordination remain future work. Construction invoice and freshness products are rebuilt globally during a daily-date backfill.
+
+## Milestone 6 — Hosted and operational hardening [pending]
+
+- [ ] Run the SaaS validation, multiple-invoice, and period-repair cases in Databricks and record separate hosted evidence.
+- [ ] Exercise hosted construction date-range backfill and repair against a retained baseline generation.
+- [ ] Define and verify concurrent-writer protection and unattended repair scheduling before treating the local ledger as an operational control.
+- [ ] Evaluate lineage, access-control boundaries, other object-store pointer semantics, and larger workloads; record measured results and limits.
 
 ## Status and evidence
 

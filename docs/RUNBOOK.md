@@ -32,7 +32,11 @@ Stop downstream use of a suspect new generation by keeping the prior pointer. Pr
 
 ## Backfill and historical reconstruction
 
-The current local rebuild is bounded by the source files retained in one project root, but recomputes the full current state rather than providing an incremental date-range API. Published generation Delta directories are retained independently of Delta time travel; no automatic pruning is configured. To rebuild, replay all retained source files into a separate clean root, compare outputs and provenance, and retain both root and generation evidence. A date-range-only rebuild is not implemented and must not be claimed.
+Published generation Delta directories are retained independently of Delta time travel; no automatic pruning is configured. Preserve all source files and the current pointer before repair. For a construction daily-delivery backfill, run `.venv/bin/python -m data_pipelines.cli run --root <root> --start-date YYYY-MM-DD --end-date YYYY-MM-DD`. The inclusive range replaces only daily-delivery rows for those dates; other dates are copied from the prior generation. Invoice and source-freshness products are recomputed globally because they have no date partition. For SaaS billing periods, run `.venv/bin/python -m data_pipelines.cli saas-run --root <root> --start-period YYYY-MM --end-period YYYY-MM`; unrelated periods remain from the prior generation. Both require an existing complete baseline.
+
+Inspect `<root>/evidence/run_ledger.jsonl` for the failed run ID and its range. Rerun the same command with `--repair-run-id <failed-run-id>`. The repair rejects a successful run ID or a changed range, then stages a new generation and links its ledger entry to the failure. Confirm the pointer moved only after successful publication, compare the new scoped rows with a clean rebuild, check unrelated rows against the prior generation, and retain the older generation. The local ledger does not coordinate concurrent writers or serve as a hosted Databricks ledger.
+
+For the newest unresolved failure, `.venv/bin/python -m data_pipelines.cli repair-pending --domain construction --root <root>` or `--domain saas` selects its recorded range and run ID automatically. A successful repair also closes failed attempts in its repair chain. This command is operator initiated; no background scheduler is installed.
 
 ## Rollback
 
