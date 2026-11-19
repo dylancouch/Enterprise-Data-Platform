@@ -1,0 +1,27 @@
+{
+  "synthetic": true,
+  "verification": "Databricks hosted serverless job",
+  "verified_at_utc": "2026-11-19T18:29:07.316933+00:00",
+  "root": "/Volumes/workspace/dev_dylancouch_enterprise_data_dev/enterprise_data/construction-backfill-acceptance/20261119T182247Z",
+  "job_cases": {
+    "baseline": {
+      "run_id": "1fa5c960-f94a-4580-b09f-3668984aaa28",
+      "generation": "20261119T182441538288Z-1fa5c960"
+    },
+    "interrupted_backfill": {
+      "run_id": "f7e435d3-8754-40e4-94ae-79b404cd110b",
+      "status": "FAILED_INJECTED",
+      "consumer_generation_after_failure": "20261119T182441538288Z-1fa5c960"
+    },
+    "linked_repair": {
+      "run_id": "54dcf864-eaed-4749-90fc-50a05d8f0b7f",
+      "generation": "20261119T182834319238Z-54dcf864",
+      "repairs_run_id": "f7e435d3-8754-40e4-94ae-79b404cd110b",
+      "corrected_date": "2026-10-20",
+      "corrected_accepted_metric_tonnes": "9.000000",
+      "unrelated_date": "2026-10-21",
+      "unrelated_accepted_metric_tonnes": "10.000000"
+    }
+  },
+  "assertions_passed": true
+}

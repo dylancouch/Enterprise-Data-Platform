@@ -15,8 +15,10 @@ from pyspark.sql import types as T
 
 from data_pipelines import PROJECT_DESCRIPTION, PROJECT_NAME
 from data_pipelines.spark_delta import (
+    append_ledger_entry,
     create_spark,
     freshness_status,
+    guarded_run,
     latest_revision,
     merge_raw,
     publish_generation,
@@ -56,11 +58,17 @@ def _read_files(spark: SparkSession, landing: Path, run_id: str):
         content_hash = hashlib.sha256(content).hexdigest()
         frame = spark.read.option("header", True).option("inferSchema", False).csv(str(path))
         business_columns = frame.columns
+        payload_columns = [
+            column for column in business_columns
+            if column not in {"imported_file", "imported_file_content_hash"}
+        ]
         frame = (frame.withColumn("source_file", F.lit(path.name))
             .withColumn("file_content_hash", F.lit(content_hash))
             .withColumn("ingested_at", F.lit(now))
             .withColumn("ingestion_batch_id", F.lit(run_id)))
-        frame = frame.withColumn("payload_hash", F.sha2(F.to_json(F.struct(*[F.col(c) for c in business_columns])), 256))
+        if "imported_file" not in business_columns:
+            frame = frame.withColumn("imported_file", F.lit(path.name))
+        frame = frame.withColumn("payload_hash", F.sha2(F.to_json(F.struct(*[F.col(c) for c in payload_columns])), 256))
         feed = next(name for name in FEEDS if path.name.startswith(name + "_"))
         rows[feed].append(frame)
     return rows
@@ -77,12 +85,11 @@ def _union(frames):
 
 def _construction_ledger(root: Path, entry: dict[str, object]) -> None:
     path = root / "evidence" / "run_ledger.jsonl"
-    path.parent.mkdir(parents=True, exist_ok=True)
     entry = {"domain": "construction", **entry}
-    with path.open("a", encoding="utf-8") as stream:
-        stream.write(json.dumps(entry, default=str, sort_keys=True) + "\n")
+    append_ledger_entry(path, entry)
 
 
+@guarded_run
 def run_pipeline(root: Path, spark: SparkSession | None = None, fail_after_product: str | None = None,
                  start_date: str | None = None, end_date: str | None = None,
                  repair_run_id: str | None = None) -> dict[str, object]:
@@ -133,6 +140,9 @@ def _run_pipeline_impl(root: Path, spark: SparkSession | None, fail_after_produc
                        start_date: str | None, end_date: str | None,
                        repair_run_id: str | None) -> dict[str, object]:
     root = root.resolve()
+    source_metadata_path = root / "source_metadata.json"
+    source_metadata = json.loads(source_metadata_path.read_text(encoding="utf-8")) if source_metadata_path.exists() else {}
+    synthetic_input = bool(source_metadata.get("synthetic", True))
     landing, store = root / "landing", root / "tables"
     if not landing.exists():
         raise FileNotFoundError(f"Synthetic feed landing folder does not exist: {landing}")
@@ -249,6 +259,21 @@ def _run_pipeline_impl(root: Path, spark: SparkSession | None, fail_after_produc
         quarantined.append(allocations.filter(F.col("quarantine_reason").isNotNull()).withColumn("feed", F.lit("invoice_delivery_allocations")))
         allocations = allocations.filter(F.col("quarantine_reason").isNull()).drop("quarantine_reason")
         _write_delta(allocations, store / "silver" / "invoice_delivery_allocations_current")
+
+    if allocations is None and lines is not None:
+        # Keep invoice lines reportable when a business export has no explicit
+        # delivery links; the reconciliation will surface MISSING_ALLOCATION.
+        allocations = spark.createDataFrame([], T.StructType([
+            T.StructField("company_id", T.StringType()),
+            T.StructField("supplier_id", T.StringType()),
+            T.StructField("invoice_id", T.StringType()),
+            T.StructField("invoice_line_id", T.StringType()),
+            T.StructField("allocation_id", T.StringType()),
+            T.StructField("delivery_id", T.StringType()),
+            T.StructField("allocated_quantity", T.StringType()),
+            T.StructField("quantity_unit", T.StringType()),
+            T.StructField("imported_file", T.StringType()),
+        ]))
 
     # A missing receipt is a normal late-arrival state. Keep ticket and invoice
     # evidence flowing so reporting can show pending support until it arrives.
@@ -372,7 +397,7 @@ def _run_pipeline_impl(root: Path, spark: SparkSession | None, fail_after_produc
             started if file_count else None,
             status,
             started,
-            True,
+            synthetic_input,
         ))
     source_freshness = spark.createDataFrame(freshness_rows, freshness_schema)
     products.append(("source_freshness", source_freshness))
@@ -479,6 +504,7 @@ def _run_pipeline_impl(root: Path, spark: SparkSession | None, fail_after_produc
             F.col("po_unit_price").alias("po_unit_price_decimal"),
             "po_price_unit",
             "po_currency",
+            F.col("imported_file").alias("delivery_source_file"),
             "delivery_state",
             "accepted_net_quantity",
         )
@@ -545,6 +571,8 @@ def _run_pipeline_impl(root: Path, spark: SparkSession | None, fail_after_produc
         # before summing receipt facts, preventing quantity fan-out.
         delivery_grain = alloc_detail.groupBy(*line_keys, "delivery_id").agg(
             F.max("accepted_net_quantity").alias("accepted_net_quantity"),
+            F.max("delivery_source_file").alias("delivery_source_file"),
+            F.max("imported_file").alias("allocation_source_file"),
             F.max("unresolved_delivery").alias("unresolved_delivery"),
             F.max(F.when(F.col("delivery_state") == "CANCELLED", 1).otherwise(0)).alias("cancelled_delivery"),
             F.max("price_mismatch").alias("price_mismatch"),
@@ -554,6 +582,8 @@ def _run_pipeline_impl(root: Path, spark: SparkSession | None, fail_after_produc
         )
         alloc_ref = delivery_grain.groupBy(*line_keys).agg(
             F.sum("accepted_net_quantity").alias("allocated_receipt_quantity"),
+            F.concat_ws(", ", F.sort_array(F.collect_set("delivery_source_file"))).alias("delivery_source_files"),
+            F.concat_ws(", ", F.sort_array(F.collect_set("allocation_source_file"))).alias("allocation_source_files"),
             F.max("unresolved_delivery").alias("unresolved_delivery"),
             F.max("cancelled_delivery").alias("cancelled_delivery"),
             F.max("price_mismatch").alias("price_mismatch"),
@@ -633,7 +663,7 @@ def _run_pipeline_impl(root: Path, spark: SparkSession | None, fail_after_produc
                 "project": PROJECT_NAME,
                 "description": PROJECT_DESCRIPTION,
                 "domain": "construction",
-                "synthetic": True,
+                "synthetic": synthetic_input,
                 "run_id": run_id,
                 "status": "FAILED_INJECTED",
                 "published": False,
@@ -682,12 +712,13 @@ def _run_pipeline_impl(root: Path, spark: SparkSession | None, fail_after_produc
         "end_date": end_date,
         "repairs_run_id": repair_run_id,
         "published": True,
-        "synthetic": True,
+        "synthetic": synthetic_input,
         "started_at_utc": started,
         "finished_at_utc": datetime.now(UTC).isoformat(),
         "source_rows_by_feed": counts,
         "duplicate_business_envelopes_suppressed": duplicates,
         "quarantine_rows": quarantine.count(),
+        "quarantined_records": [row.asDict(recursive=True) for row in quarantine.limit(200).collect()],
         "product_rows": product_counts,
         "daily_delivered": product_rows("daily_delivered_quantities"),
         "invoice_exceptions": product_rows("invoice_exceptions"),

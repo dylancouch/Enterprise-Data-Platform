@@ -1,0 +1,5 @@
+Supplier,Invoice ID,Invoice Date,Currency,Status,Invoice Number
+SUP-01,AP-4001,2026-10-21,USD,Posted,NMI-8841
+SUP-02,AP-4002,2026-10-21,USD,Posted,NMI-8842
+SUP-01,AP-4003,2026-10-22,USD,Posted,NMI-8843
+SUP-02,AP-4004,2026-10-22,USD,Posted,NMI-8844

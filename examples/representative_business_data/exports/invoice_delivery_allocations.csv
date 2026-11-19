@@ -1,0 +1,5 @@
+Supplier,Invoice ID,Invoice Line Number,Allocation,Delivery Number,Allocated Quantity,UOM
+SUP-01,AP-4001,1,1,DEL-2001,10,metric_tonne
+SUP-02,AP-4002,1,1,DEL-2002,8,metric_tonne
+SUP-01,AP-4003,1,1,DEL-2003,3,metric_tonne
+SUP-02,AP-4004,1,1,DEL-2004,4,metric_tonne

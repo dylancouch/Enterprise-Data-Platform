@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
+import subprocess
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -41,7 +44,18 @@ def main() -> None:
     repair = sub.add_parser("repair-pending", help="repair the latest unresolved failed local run")
     repair.add_argument("--root", type=Path, required=True)
     repair.add_argument("--domain", choices=["construction", "saas"], required=True)
+    app = sub.add_parser("app", help="open the local business data import and reconciliation app")
+    app.add_argument("--port", type=int, default=8501)
     args = parser.parse_args()
+    if args.command == "app":
+        if importlib.util.find_spec("streamlit") is None:
+            parser.error("Install the browser app with: pip install -e '.[app]'")
+        app_path = Path(__file__).with_name("app.py")
+        subprocess.run([
+            sys.executable, "-m", "streamlit", "run", str(app_path),
+            "--server.address", "127.0.0.1", "--server.port", str(args.port),
+        ], check=False)
+        return
     if args.command == "saas-demo":
         print(json.dumps(walkthrough(args.root), indent=2, default=str))
         return

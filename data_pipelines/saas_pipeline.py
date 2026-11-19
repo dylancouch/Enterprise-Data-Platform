@@ -18,8 +18,10 @@ from pyspark.sql import types as T
 
 from data_pipelines import PROJECT_DESCRIPTION, PROJECT_NAME
 from data_pipelines.spark_delta import (
+    append_ledger_entry,
     create_spark,
     freshness_status,
+    guarded_run,
     latest_revision,
     merge_raw,
     publish_generation,
@@ -39,10 +41,8 @@ def _ledger_path(root: Path) -> Path:
 
 def _append_ledger(root: Path, entry: dict[str, object]) -> None:
     path = _ledger_path(root)
-    path.parent.mkdir(parents=True, exist_ok=True)
     entry = {"domain": "saas", **entry}
-    with path.open("a", encoding="utf-8") as stream:
-        stream.write(json.dumps(entry, default=str, sort_keys=True) + "\n")
+    append_ledger_entry(path, entry)
 
 
 def _ledger_entry(root: Path, run_id: str) -> dict[str, object]:
@@ -125,6 +125,7 @@ def _write_evidence(root: Path, report: dict[str, object]) -> None:
     (root / "evidence" / "run.json").write_text(json.dumps(report, indent=2, default=str) + "\n", encoding="utf-8")
 
 
+@guarded_run
 def run(root: Path, spark: SparkSession, fail_before_publish: bool = False,
         start_period: str | None = None, end_period: str | None = None,
         repair_run_id: str | None = None) -> dict[str, object]:

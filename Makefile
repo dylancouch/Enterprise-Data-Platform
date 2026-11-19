@@ -5,10 +5,13 @@ export SPARK_LOCAL_IP := 127.0.0.1
 export HOME := $(CURDIR)/.home
 export PYSPARK_SUBMIT_ARGS ?= --driver-memory 4g pyspark-shell
 
-.PHONY: install demo saas-demo test lint recovery-demo benchmark verify-reliability
+.PHONY: install app demo saas-demo test lint recovery-demo benchmark verify-reliability
 install:
 	mkdir -p .home .cache/ivy .cache/spark-tmp
-	.venv/bin/pip install -e '.[dev]'
+	.venv/bin/pip install -e '.[app,dev]'
+
+app:
+	.venv/bin/edp app
 
 demo:
 	mkdir -p .home .cache/ivy .cache/spark-tmp

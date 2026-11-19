@@ -1,0 +1,11 @@
+{
+  "mode": "sweep",
+  "status": "REPAIRED",
+  "failed_run_id": "5ce3c7ab-e7b2-4db8-8170-9d48ae64c249",
+  "repair_run_id": "96db726f-b5d5-4513-9f16-96a71d2833fa",
+  "generation": "20261119T183649186391Z-96db726f",
+  "accepted_metric_tonnes": "9.000000",
+  "synthetic": true,
+  "verified_at_utc": "2026-11-19T18:37:24.446241+00:00",
+  "root": "/Volumes/workspace/dev_dylancouch_enterprise_data_dev/enterprise_data/operations/construction"
+}

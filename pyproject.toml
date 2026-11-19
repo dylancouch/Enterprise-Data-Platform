@@ -11,6 +11,7 @@ dependencies = ["pyspark==4.0.1", "delta-spark==4.0.0", "pyyaml>=6,<7"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.3,<9", "ruff>=0.14,<1"]
+app = ["streamlit>=1.42,<2"]
 
 [project.scripts]
 edp = "data_pipelines.cli:main"

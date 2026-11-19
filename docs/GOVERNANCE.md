@@ -1,6 +1,6 @@
 # Construction example governance and access verification
 
-The following is an intended access matrix for future Unity Catalog permission work. A project schema and volume have been deployed for the bounded construction demo, but workspace principals and grants have not been configured or tested for these roles. This matrix is a design proposal, not evidence of enforced access controls.
+The following is an intended access matrix for future Unity Catalog permission work. A project schema and volume have been deployed for the bounded synthetic jobs, but workspace principals and grants have not been configured or tested for these roles. This matrix is a design proposal, not evidence of enforced access controls. A read-only grant inspection on 2026-11-19 found no direct grants on the project schema or volume; the `workspace` catalog grants `USE_CATALOG` to workspace users. See [the evaluation](MILESTONE6_EVALUATION.md).
 
 | Role | Intended access | Restrictions | Verification |
 |---|---|---|---|
@@ -12,4 +12,4 @@ Before claiming these access boundaries, map the roles to approved workspace gro
 
 ## Lineage evidence
 
-Native Databricks lineage has not yet been inspected for the hosted construction run. Local evidence carries source feed, source file, content hash, source record ID/revision, payload hash, ingestion time, batch ID, and published generation. These fields provide application-level traceability; they are not a substitute claim for platform-native lineage.
+Native Databricks lineage was queried on 2026-11-19. Path events were present, while no registered Unity Catalog table names appeared in the project-matching events. See [the evaluation](MILESTONE6_EVALUATION.md) for counts and the query window. Local evidence carries source feed, source file, content hash, source record ID/revision, payload hash, ingestion time, batch ID, and published generation. These fields provide application-level traceability; they are not a substitute claim for complete platform-native lineage.

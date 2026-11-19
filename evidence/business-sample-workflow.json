@@ -1,0 +1,78 @@
+{
+  "verification": "Both app routes were run with export-shaped fictional company records. The sample route and CSV upload route each used CSV parsing, alias-based field mapping, validation/normalization, Spark/Delta reconciliation, and report generation. The report renderer was checked to include plain-language explanations and next steps for each sample issue.",
+  "synthetic": true,
+  "expected_results_file": "examples/representative_business_data/expected/business_outcomes.json",
+  "expected_results": {
+    "accepted_delivered_metric_tonnes": "20.700000",
+    "net_invoice_amount_usd": "409.00",
+    "invoice_exception_count": 4,
+    "duplicate_business_envelopes_suppressed": 1,
+    "quarantine_rows": 1,
+    "quarantine_reasons": {
+      "UNKNOWN_WEIGHT_UNIT": 1
+    },
+    "invoice_exception_reasons": {
+      "QUANTITY_MISMATCH": 1,
+      "LINE_AMOUNT_MISMATCH": 1,
+      "MISSING_ALLOCATION": 1,
+      "PENDING_SUPPORTING_DELIVERY": 1
+    },
+    "rejected_delivery_metric_tonnes_excluded": "4.000000",
+    "pending_delivery_metric_tonnes_excluded": "5.000000"
+  },
+  "actual_results": {
+    "accepted_delivered_metric_tonnes": "20.700000",
+    "net_invoice_amount_usd": "409.00",
+    "invoice_exception_count": 4,
+    "invoice_exception_reasons": {
+      "LINE_AMOUNT_MISMATCH": 1,
+      "MISSING_ALLOCATION": 1,
+      "PENDING_SUPPORTING_DELIVERY": 1,
+      "QUANTITY_MISMATCH": 1
+    },
+    "quarantine_rows": 1,
+    "quarantine_reasons": {
+      "UNKNOWN_WEIGHT_UNIT": 1
+    },
+    "duplicate_business_envelopes_suppressed": 1
+  },
+  "all_expected_results_matched": true,
+  "source_files": [
+    "examples/representative_business_data/exports/invoice_delivery_allocations.csv",
+    "examples/representative_business_data/exports/invoice_lines.csv",
+    "examples/representative_business_data/exports/invoices.csv",
+    "examples/representative_business_data/exports/purchase_order_lines.csv",
+    "examples/representative_business_data/exports/scale_tickets.csv",
+    "examples/representative_business_data/exports/site_receipts.csv"
+  ],
+  "source_rows_by_feed": {
+    "purchase_order_lines": 4,
+    "scale_tickets": 7,
+    "site_receipts": 6,
+    "invoices": 4,
+    "invoice_lines": 5,
+    "invoice_delivery_allocations": 4
+  },
+  "verification_paths": {
+    "recommended_example": {
+      "run_id": "cdf81d3a-4eb2-420e-a522-019a06a02415",
+      "status": "SUCCESS",
+      "published": true,
+      "synthetic": true,
+      "finished_at_utc": "2026-11-19T20:22:47.046887+00:00"
+    },
+    "csv_upload_flow": {
+      "run_id": "b0818993-2dd9-49fc-903b-9a217e910859",
+      "status": "SUCCESS",
+      "published": true,
+      "synthetic": true,
+      "finished_at_utc": "2026-11-19T20:23:47.769568+00:00"
+    },
+    "browser_server_smoke": {
+      "command": "edp app --port 8502",
+      "bound_address": "127.0.0.1",
+      "http_response": "200 OK"
+    }
+  },
+  "scope_note": "Fictional export-shaped records informed by public ERP documentation and open purchasing records. No private company export was available or required; scale-ticket and site-receipt fields remain documented workflow assumptions."
+}

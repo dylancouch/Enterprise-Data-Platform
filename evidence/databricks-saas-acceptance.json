@@ -1,0 +1,26 @@
+{
+  "synthetic": true,
+  "verification": "Databricks hosted serverless job",
+  "verified_at_utc": "2026-11-19T18:16:47.634972+00:00",
+  "root": "/Volumes/workspace/dev_dylancouch_enterprise_data_dev/enterprise_data/saas-acceptance/20261119T181538Z",
+  "runs": {
+    "saas_validation_multiple_invoice_and_quarantine": {
+      "run_id": "69d59296-9f22-48d5-9554-343b709cedac",
+      "generation": "20261119T181601211956Z-69d59296",
+      "quarantine_rows": 1,
+      "acme_billed_units": 200,
+      "acme_invoice_count": 2
+    },
+    "saas_period_backfill": {
+      "baseline_run_id": "e2497025-6e42-46ed-be69-64c719dc1498",
+      "repair_run_id": "effadad0-2973-4993-b19d-26b03ab3a408",
+      "baseline_generation": "20261119T181620149793Z-e2497025",
+      "generation": "20261119T181641485427Z-effadad0",
+      "rebuilt_period": "2026-10",
+      "observed_units_after_correction": 190,
+      "unrelated_period": "2026-09",
+      "unrelated_period_observed_units": 5
+    }
+  },
+  "assertions_passed": true
+}

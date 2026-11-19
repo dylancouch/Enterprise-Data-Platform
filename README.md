@@ -2,7 +2,7 @@
 
 A Spark and Delta data platform for integrating operational sources, publishing trustworthy analytics, and monitoring pipeline health across industries.
 
-This portfolio project uses **synthetic operational data only**. It demonstrates shared source ingestion, revision and replay handling, freshness assessment, and complete report publication across two independent examples: construction purchasing/delivery/invoices and SaaS usage/billing. Both use local PySpark and Delta. The versioned Databricks bundle has also been validated, deployed, and run for bounded construction acceptance cases in a Free Edition workspace; see [hosted evidence](evidence/databricks-construction-acceptance.json). The project is not connected to a real contractor or software provider.
+The local browser app lets a business user import purchasing, delivery, receipt, and invoice CSV exports and receive a reconciliation report. Users without exports can choose realistic synthetic data through the same app. The project also includes SaaS and construction data-processing examples, reliability handling, and bounded Databricks runs. Business files and reports stay on the computer running the local app; no live accounting, procurement, or ERP connector is included yet. See the [CSV import guide](docs/CSV_IMPORT.md) for supported data and limits.
 
 The shared Spark/Delta mechanics are in `data_pipelines/spark_delta.py`. `data_pipelines/construction_pipeline.py` and `data_pipelines/saas_pipeline.py` contain the example-specific logic; `data_pipelines/construction_generator.py` creates synthetic construction inputs. Run them through `data_pipelines/cli.py`. See [the shared contract](docs/PLATFORM_CONTRACT.md), [construction contracts](docs/SOURCE_CONTRACTS.md), [SaaS contract](docs/SAAS_CONTRACT.md), and [the extension guide](docs/EXTENDING.md).
 
@@ -17,13 +17,12 @@ Requires Python 3.11 or newer, Java 17, and network access to Maven Central the 
 
 ```bash
 python3 -m venv .venv
-.venv/bin/pip install -e '.[dev]'
+.venv/bin/pip install -e '.[app,dev]'
 # If Java is not installed on the host, provision a project-scoped Java 17 runtime as described in docs/STATUS.md.
-make demo
-make saas-demo
+make app
 ```
 
-The installed CLI exposes the same examples as `.venv/bin/edp demo --root data/demo` and `.venv/bin/edp saas-demo --root data/saas-demo`. The `generate`, `run`, and `report` subcommands operate on construction; `saas-run` operates on SaaS.
+The browser app runs on this computer. Choose the recommended synthetic company example or import your own purchasing, delivery, receipt, and invoice CSV exports. The example uses multiple export-shaped files with familiar ERP-style headers and includes both matching and problem records. The app previews files, suggests column mappings, checks required values, and creates a reconciliation report with invoice exceptions. Imported data and results are saved locally under `data/user-runs/`. See the [CSV import guide](docs/CSV_IMPORT.md) for the sample files, accepted data, and current limits. Start the lower-level command line examples with `.venv/bin/edp demo --root data/demo` or `.venv/bin/edp saas-demo --root data/saas-demo`.
 
 Run `make verify-reliability` for a credential-free local Spark/Delta check of replay, revisions, late arrivals, interrupted publication, and recovery in both examples. It writes [synthetic reliability evidence](evidence/local-reliability.json) and a [synthetic operational report](reports/synthetic-reliability.html).
 
@@ -57,6 +56,8 @@ databricks bundle run construction_demo -t dev
 ```
 
 The job writes synthetic files and Delta products to its managed Unity Catalog volume. Development mode prefixes the schema name; the job resolves the deployed volume path from the bundle resource. The [hosted evidence](evidence/databricks-construction-acceptance.json) covers golden output, replay, ticket revision, late receipt, interrupted publication, and recovery. Other workspace behavior remains subject to the limits in [project status](docs/STATUS.md).
+
+The bundle also includes `saas_acceptance`, `construction_backfill_acceptance`, and separate scheduled synthetic repair sweeps for construction and SaaS. Their bounded results and current limits are in [Milestone 6 evaluation](docs/MILESTONE6_EVALUATION.md), [schedule evidence](evidence/databricks-repair-schedules.json), and [project status](docs/STATUS.md).
 
 ## Reports and recovery
 

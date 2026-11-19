@@ -1,6 +1,6 @@
 # Construction example acceptance scenarios
 
-Executable assertions live in `tests/test_pipeline.py`, with sanitized local run evidence under `evidence/`. This checklist includes implemented and future scenarios; `docs/STATUS.md` records which have actually run. Golden output, replay, revision, late receipt, interrupted publication, and recovery have also been exercised in Databricks; see [hosted evidence](../evidence/databricks-construction-acceptance.json). Other cases remain unverified there. Keep source scenario truth out of ingestion inputs.
+Executable assertions live in `tests/test_pipeline.py`, with sanitized local run evidence under `evidence/`. This checklist includes implemented and future scenarios; `docs/STATUS.md` records which have actually run. Golden output, replay, revision, late receipt, interrupted publication, and recovery have also been exercised in Databricks; see [hosted evidence](../evidence/databricks-construction-acceptance.json). Hosted date-range backfill and repair are recorded separately in [backfill evidence](../evidence/databricks-construction-backfill.json). Other cases remain unverified there. Keep source scenario truth out of ingestion inputs.
 
 | Scenario | Expected behavior |
 | --- | --- |
@@ -57,4 +57,4 @@ Run `make verify-reliability` after the local environment is installed. The comm
 | Interrupted scoped backfill and repair | Pointer stays on baseline, failed run is recorded, repair links to it, and rerun converges |
 | Select newest pending local repair | Domain-specific ledger lookup skips failures already closed by a successful repair chain |
 
-The construction date range scopes only `daily_delivered_quantities`; invoice and freshness products are recomputed globally. These additions are local checks. Hosted SaaS and hosted backfill have not run.
+The construction date range scopes only `daily_delivered_quantities`; invoice and freshness products are recomputed globally. Local cases are recorded in [local acceptance evidence](../evidence/local-saas-backfill-acceptance.json). Hosted SaaS validation, multiple-invoice aggregation, and period repair passed in the Databricks development workspace; see [hosted SaaS evidence](../evidence/databricks-saas-acceptance.json). Hosted construction date-range failure, retained pointer, and linked repair passed against a two-date baseline; see [hosted backfill evidence](../evidence/databricks-construction-backfill.json).

@@ -2,18 +2,62 @@
 
 from __future__ import annotations
 
+import fcntl
 import json
+import os
+import uuid
+from contextlib import contextmanager
 from datetime import UTC, datetime
+from functools import wraps
 from pathlib import Path
 
 from pyspark.sql import DataFrame, SparkSession, Window
 from pyspark.sql import functions as F
 
 
+def append_ledger_entry(path: Path, entry: dict[str, object]) -> None:
+    """Replace a small JSONL ledger without relying on volume append support."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    previous = path.read_text(encoding="utf-8") if path.exists() else ""
+    temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
+    temporary.write_text(previous + json.dumps(entry, default=str, sort_keys=True) + "\n",
+                         encoding="utf-8")
+    temporary.replace(path)
+
+
+@contextmanager
+def single_local_writer(root: Path):
+    """Hold a process lock for local roots through publication and ledger write."""
+    if str(root).startswith("/Volumes/"):
+        # Hosted jobs use max_concurrent_runs=1 and isolated per-job roots.
+        yield
+        return
+    lock_path = root.resolve() / "evidence" / ".writer.lock"
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("w", encoding="utf-8") as lock:
+        try:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise RuntimeError(f"Another pipeline writer holds {lock_path}") from exc
+        try:
+            yield
+        finally:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+
+
+def guarded_run(function):
+    """Serialize a domain run for one local root."""
+    @wraps(function)
+    def wrapper(root: Path, *args, **kwargs):
+        with single_local_writer(root):
+            return function(root, *args, **kwargs)
+    return wrapper
+
+
 def create_spark(app_name: str = "enterprise-data-platform") -> SparkSession:
     project_root = Path(__file__).resolve().parents[1]
     builder = SparkSession.builder.appName(app_name)
-    if "DATABRICKS_RUNTIME_VERSION" in __import__("os").environ:
+    if "DATABRICKS_RUNTIME_VERSION" in os.environ:
         return builder.getOrCreate()
     from delta import configure_spark_with_delta_pip
 

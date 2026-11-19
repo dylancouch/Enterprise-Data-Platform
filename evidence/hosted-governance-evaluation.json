@@ -1,0 +1,29 @@
+{
+  "synthetic": true,
+  "verified_at_utc": "2026-11-19",
+  "workspace": "Databricks Free Edition development workspace",
+  "lineage": {
+    "query_statement_id": "01f1e447-62c0-11ed-8397-04a8458a2545",
+    "source": "system.access.table_lineage",
+    "window_days": 7,
+    "filter": "source_path or target_path contains enterprise_data",
+    "events": 1716,
+    "source_path_events": 1693,
+    "target_path_events": 686,
+    "source_registered_table_events": 0,
+    "target_registered_table_events": 0,
+    "first_event_utc": "2026-11-17T16:58:19.737Z",
+    "last_event_utc": "2026-11-19T18:15:03.813Z"
+  },
+  "access": {
+    "catalog": "workspace",
+    "catalog_isolation_mode": "ISOLATED",
+    "catalog_effective_grant": "workspace users: USE_CATALOG",
+    "project_schema_direct_grants": 0,
+    "project_volume_direct_grants": 0,
+    "project_volume_listed_effective_grants": 0,
+    "project_schema_owner": "deployment user",
+    "project_volume_owner": "deployment user",
+    "role_principal_positive_negative_tests": "not run; no approved role principals configured"
+  }
+}

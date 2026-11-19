@@ -1,0 +1,18 @@
+{
+  "accepted_delivered_metric_tonnes": "20.700000",
+  "net_invoice_amount_usd": "409.00",
+  "invoice_exception_count": 4,
+  "duplicate_business_envelopes_suppressed": 1,
+  "quarantine_rows": 1,
+  "quarantine_reasons": {
+    "UNKNOWN_WEIGHT_UNIT": 1
+  },
+  "invoice_exception_reasons": {
+    "QUANTITY_MISMATCH": 1,
+    "LINE_AMOUNT_MISMATCH": 1,
+    "MISSING_ALLOCATION": 1,
+    "PENDING_SUPPORTING_DELIVERY": 1
+  },
+  "rejected_delivery_metric_tonnes_excluded": "4.000000",
+  "pending_delivery_metric_tonnes_excluded": "5.000000"
+}

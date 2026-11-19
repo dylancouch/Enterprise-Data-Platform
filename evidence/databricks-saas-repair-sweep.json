@@ -1,0 +1,12 @@
+{
+  "mode": "sweep",
+  "status": "REPAIRED",
+  "failed_run_id": "50b22b1c-a6de-4610-bd1e-adb5d5f85a21",
+  "repair_run_id": "2eea5306-6b56-41f9-b7a9-9ae2bb80b19e",
+  "generation": "20261119T184031079690Z-2eea5306",
+  "observed_units": 190,
+  "billed_units": 190,
+  "synthetic": true,
+  "verified_at_utc": "2026-11-19T18:40:35.881943+00:00",
+  "root": "/Volumes/workspace/dev_dylancouch_enterprise_data_dev/enterprise_data/operations/saas"
+}

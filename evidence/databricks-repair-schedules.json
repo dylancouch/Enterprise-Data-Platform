@@ -1,0 +1,32 @@
+{
+  "synthetic": true,
+  "verified_at_utc": "2026-11-19",
+  "workspace": "Databricks Free Edition development workspace",
+  "schedule_after_verification": "0 0 * * * ?",
+  "timezone": "UTC",
+  "pause_status": "UNPAUSED",
+  "max_concurrent_runs_per_job": 1,
+  "construction": {
+    "job_id": "1043114988294392",
+    "seed_job_run_id": "909263164825926",
+    "periodic_job_run_id": "951665580154056",
+    "periodic_trigger": "PERIODIC",
+    "periodic_result": "SUCCESS",
+    "failed_run_id": "5ce3c7ab-e7b2-4db8-8170-9d48ae64c249",
+    "repair_run_id": "96db726f-b5d5-4513-9f16-96a71d2833fa",
+    "result_evidence": "evidence/databricks-repair-sweep.json"
+  },
+  "saas": {
+    "job_id": "405578100384380",
+    "seed_job_run_id": "676889663406812",
+    "periodic_job_run_id": "791190359579729",
+    "periodic_trigger": "PERIODIC",
+    "periodic_result": "SUCCESS",
+    "failed_run_id": "50b22b1c-a6de-4610-bd1e-adb5d5f85a21",
+    "repair_run_id": "2eea5306-6b56-41f9-b7a9-9ae2bb80b19e",
+    "post_repair_manual_noop_job_run_id": "232439595064566",
+    "post_repair_manual_noop_result": "NO_PENDING_REPAIR",
+    "result_evidence": "evidence/databricks-saas-repair-sweep.json"
+  },
+  "scope": "One designated scheduled writer per isolated synthetic operations root; not a cross-job distributed lock"
+}

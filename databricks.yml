@@ -11,6 +11,9 @@ variables:
   demo_scenario:
     description: Synthetic source scenario to generate for this bounded demo run
     default: golden
+  repair_schedule_status:
+    description: Schedule state for synthetic repair sweeps
+    default: PAUSED
 
 workspace:
   # Configure this profile with `databricks auth login --host <workspace-url> --profile enterprise-data-dev`.
@@ -51,6 +54,138 @@ resources:
           spec:
             environment_version: "6"
             dependencies: []
+    saas_acceptance:
+      name: enterprise-data-platform-saas-acceptance-${bundle.target}
+      max_concurrent_runs: 1
+      timeout_seconds: 3600
+      tasks:
+        - task_key: saas_acceptance
+          max_retries: 0
+          spark_python_task:
+            python_file: ./data_pipelines/databricks_saas_acceptance.py
+            parameters:
+              - --code-root
+              - ${workspace.file_path}
+              - --root
+              - ${resources.volumes.enterprise_data_volume.volume_path}/saas-acceptance
+          environment_key: default
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "6"
+            dependencies: []
+    construction_backfill_acceptance:
+      name: enterprise-data-platform-construction-backfill-${bundle.target}
+      max_concurrent_runs: 1
+      timeout_seconds: 3600
+      tasks:
+        - task_key: construction_backfill_acceptance
+          max_retries: 0
+          spark_python_task:
+            python_file: ./data_pipelines/databricks_construction_backfill.py
+            parameters:
+              - --code-root
+              - ${workspace.file_path}
+              - --root
+              - ${resources.volumes.enterprise_data_volume.volume_path}/construction-backfill-acceptance
+          environment_key: default
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "6"
+            dependencies: []
+    construction_repair_seed:
+      name: enterprise-data-platform-repair-seed-${bundle.target}
+      max_concurrent_runs: 1
+      tasks:
+        - task_key: seed
+          max_retries: 0
+          spark_python_task:
+            python_file: ./data_pipelines/databricks_repair_control.py
+            parameters:
+              - --code-root
+              - ${workspace.file_path}
+              - --root
+              - ${resources.volumes.enterprise_data_volume.volume_path}/operations/construction
+              - --mode
+              - seed
+          environment_key: default
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "6"
+            dependencies: []
+    construction_repair_sweep:
+      name: enterprise-data-platform-repair-sweep-${bundle.target}
+      max_concurrent_runs: 1
+      schedule:
+        quartz_cron_expression: "0 0 * * * ?"
+        timezone_id: UTC
+        pause_status: ${var.repair_schedule_status}
+      tasks:
+        - task_key: repair_pending
+          max_retries: 0
+          spark_python_task:
+            python_file: ./data_pipelines/databricks_repair_control.py
+            parameters:
+              - --code-root
+              - ${workspace.file_path}
+              - --root
+              - ${resources.volumes.enterprise_data_volume.volume_path}/operations/construction
+              - --mode
+              - sweep
+          environment_key: default
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "6"
+            dependencies: []
+    saas_repair_seed:
+      name: enterprise-data-platform-saas-repair-seed-${bundle.target}
+      max_concurrent_runs: 1
+      tasks:
+        - task_key: seed
+          max_retries: 0
+          spark_python_task:
+            python_file: ./data_pipelines/databricks_saas_repair_control.py
+            parameters:
+              - --code-root
+              - ${workspace.file_path}
+              - --root
+              - ${resources.volumes.enterprise_data_volume.volume_path}/operations/saas
+              - --mode
+              - seed
+          environment_key: default
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "6"
+            dependencies: []
+    saas_repair_sweep:
+      name: enterprise-data-platform-saas-repair-sweep-${bundle.target}
+      max_concurrent_runs: 1
+      schedule:
+        quartz_cron_expression: "0 0 * * * ?"
+        timezone_id: UTC
+        pause_status: ${var.repair_schedule_status}
+      tasks:
+        - task_key: repair_pending
+          max_retries: 0
+          spark_python_task:
+            python_file: ./data_pipelines/databricks_saas_repair_control.py
+            parameters:
+              - --code-root
+              - ${workspace.file_path}
+              - --root
+              - ${resources.volumes.enterprise_data_volume.volume_path}/operations/saas
+              - --mode
+              - sweep
+          environment_key: default
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "6"
+            dependencies: []
 
 targets:
   dev:
@@ -60,8 +195,12 @@ targets:
       catalog: workspace
       schema: enterprise_data_dev
       demo_scenario: golden
+      repair_schedule_status: UNPAUSED
   prod:
     mode: production
+    workspace:
+      root_path: /Workspace/Production/.bundle/${bundle.name}
     variables:
       schema: enterprise_data_prod
       demo_scenario: golden
+      repair_schedule_status: PAUSED

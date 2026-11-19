@@ -1,0 +1,5 @@
+Purchase Order,Line Number,Project,Supplier,Item Code,Qty,UOM,Rate,Price UOM,Currency,Transaction Date,Status
+PO-1001,1,SITE-01,SUP-01,AGG-1,20,metric_tonne,12.50,metric_tonne,USD,2026-10-19T12:00:00Z,Open
+PO-1002,1,SITE-01,SUP-02,AGG-2,15,metric_tonne,18.00,metric_tonne,USD,2026-10-19T12:00:00Z,Open
+PO-1003,1,SITE-02,SUP-01,AGG-1,10,metric_tonne,12.50,metric_tonne,USD,2026-10-20T12:00:00Z,Open
+PO-1004,1,SITE-02,SUP-02,AGG-2,10,metric_tonne,18.00,metric_tonne,USD,2026-10-20T12:00:00Z,Open
